@@ -3,29 +3,19 @@
 这是一个用于收集安卓设备UI操作数据的工具，可以记录用户在手机上的点击、滑动、输入等操作，并将数据按应用和任务类型进行分类存储。
 
 ## 🛠️ 环境配置
+详情查看根目录下的README.md
 
-### 1. 创建Python环境
-```bash
-conda create -n collect python=3.10
-conda activate collect
-```
-
-### 2. 安装依赖包
-```bash
-pip install -r requirements.txt
-```
-
-## 手机配置
-- 在Android设备上安装项目根目录中的 `ADBKeyboard.apv` 文件
+### 2. 手机配置
+- 在Android设备上安装项目根目录中的 `ADBKeyboard.apk` 文件
 - 使用USB数据线连接手机和电脑
 - 手机上会弹出USB调试授权提示，点击 **允许**
 
+## 🚀 快速开始
 
 ## 项目启动
 
 ```bash
-# 在项目根目录下
-python app.py
+python -m manual_collection.server
 ```
 
 启动成功后，访问 http://localhost:9000 查看web界面

@@ -1,4 +1,4 @@
-# 📱 标题标题标题标题标题标题标题
+# 📱 Simple-AgentRR: 移动设备AI智能体数据收集与训练平台
 
 ## 🛠️ 环境配置
 ```bash
@@ -7,127 +7,58 @@ conda activate agentRR
 conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia -y
 python -m pip install paddlepaddle-gpu==3.1.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
 pip install paddleocr==2.10.0 ultralytics transformers==4.47.0 Pillow opencv-python numpy scipy supervision langchain-openai langchain-core
+pip install fastapi uvicorn uiautomator2 pillow
+
 for f in icon_detect/{train_args.yaml,model.pt,model.yaml} ; do huggingface-cli download microsoft/OmniParser-v2.0 "$f" --local-dir weights; done
 ```
 
 ## 手机配置
-- 在Android设备上安装项目根目录中的 `ADBKeyboard.apv` 文件
+- 在Android设备上安装项目根目录中的 `ADBKeyboard.apk` 文件，必须开启开发者选项
 - 使用USB数据线连接手机和电脑
 - 手机上会弹出USB调试授权提示，点击 **允许**
 
-
 ## 项目启动
+详情见子目录 README.md
 
+### 📝 手动数据收集
 ```bash
-# 在项目根目录下
-python app.py
+python -m manual_collection.server
 ```
-
 启动成功后，访问 http://localhost:9000 查看web界面
 
-## 📋 使用说明
-
-### 数据收集流程
-
-#### 第一步：开始收集
-1. 在web界面点击 **🚀 开始收集** 按钮
-
-#### 第二步：配置应用信息
-2. 在弹出的 **📱 应用信息配置** 窗口中填写：
-   - **应用名称**：如 "饿了么"、"微信"、"淘宝" 等
-   - **任务类型**：如 “tpye1”、 “tpye2” 等，具体参考收集任务文档
-
-#### 第三步：输入任务描述
-3. 在 **📝 任务描述** 窗口中详细描述当前要执行的具体任务
-
-#### 第四步：开始操作
-4. 配置完成后，点击“自动刷新”开启自动获取屏幕截图
-5. 在web界面的截图上进行操作：
-   - **点击**：快速点击截图上的任意位置
-   - **滑动**：按住鼠标拖拽到另一个位置松开，注意不要移出整个屏幕范围
-   - **文本输入**：点击 **⌨️ 文本输入** 按钮输入文本
-
-#### 第五步：保存数据
-5. 完成一个任务后，可以：
-   - 点击 **➡️ 下一条数据** 继续收集同类型任务的更多数据
-   - 点击 **⏹️ 结束收集** 结束当前收集会话
-
-### 界面功能说明
-
-#### 主要按钮
-- **🚀 开始收集**：开始新的数据收集会话
-- **⏹️ 结束收集**：保存当前数据并结束收集
-- **➡️ 下一条数据**：保存当前数据并开始收集下一条
-- **⌨️ 文本输入**：向设备发送文本内容
-- **📋 查看操作历史**：查看当前会话的所有操作记录
-- **⏰ 自动刷新**：自动刷新设备截图（连续模式）
-
-#### 操作类型
-1. **点击操作**：快速点击截图上的位置
-2. **滑动操作**：支持上下左右四个方向的滑动
-3. **文本输入**：通过ADB键盘向设备输入文本
-
-## 📁 数据存储结构
-
-数据按照以下目录结构存储：
-```
-data/
-├── <应用名称>/
-│   ├── <任务类型>/
-│   │   ├── 1/
-│   │   │   ├── 1.jpg          # 第1个操作前的截图
-│   │   │   ├── 2.jpg          # 第2个操作前的截图
-│   │   │   ├── ...
-│   │   │   └── actions.json   # 操作记录和任务信息
-│   │   ├── 2/
-│   │   │   └── ...
-│   │   └── ...
-│   └── <其他任务类型>/
-└── <其他应用名称>/
+### 🤖 自动数据收集
+先在 `/auto_collection/task.json` 写入需要完成的任务列表
+```bash
+python -m auto_collection.server
 ```
 
-### actions.json 文件格式
-```json
-{
-    "app_name": "饿了么",
-    "task_type": "帮我点<店名>的<食品名称>",
-    "task_description": "在饿了么APP中点击麦当劳的巨无霸汉堡",
-    "action_count": 3,
-    "actions": [
-        {
-            "type": "click",
-            "position_x": 500,
-            "position_y": 300,
-            "bounds": [450, 250, 550, 350]
-        },
-        {
-            "type": "swipe",
-            "press_position_x": 500,
-            "press_position_y": 800,
-            "release_position_x": 500,
-            "release_position_y": 400,
-            "direction": "up"
-        },
-        {
-            "type": "input",
-            "text": "巨无霸"
-        }
-    ]
-}
+### 🏷️ 数据标注
+```bash
+python -m annotation.auto_annotate
 ```
 
-## 📄 项目结构
+### 📊 数据构建
+```bash
+python -m construct_data.sft
+python -m construct_data.dpo
+```
 
+### 🎯 Simple-AgentRR 智能体
+```bash
+python -m simple_agentRR.simple_agentRR
 ```
-1-collect/
-├── app.py              # 主应用程序
-├── parse_xml.py        # XML解析工具
-├── requirements.txt    # Python依赖
-├── ADBKeyboard.apk    # ADB键盘应用
-├── static/            # 前端静态文件
-│   ├── index.html     # 主页面
-│   ├── css/           # 样式文件
-│   └── js/            # JavaScript文件
-├── data/              # 数据存储目录
-└── README.md          # 项目说明
-```
+
+## 📁 项目结构
+
+- `annotation/` - 数据标注模块，自动为收集的数据添加视觉标注
+- `auto_collection/` - 自动数据收集模块，通过AI智能体自动执行任务并收集数据
+- `construct_data/` - 数据构建模块，将原始数据转换为训练格式
+- `manual_collection/` - 手动数据收集模块，提供Web界面进行人工数据收集
+- `simple_agentRR/` - 核心智能体模块，实现移动设备的AI自动化操作
+- `prompts/` - 提示词模板
+- `utils/` - 工具函数库
+- `weights/` - 模型权重文件
+
+## 📖 详细文档
+
+每个子模块都有独立的README文档，详细说明使用方法和配置选项。请参考对应目录下的README.md文件。
