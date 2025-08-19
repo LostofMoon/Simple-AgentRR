@@ -423,9 +423,14 @@ def change_auto_data(data_log_path, index):
     dest_path_dir = os.path.join(current_dir, 'auto_collection', 'data')
     if not os.path.exists(dest_path_dir):
         os.makedirs(dest_path_dir)
-    dest_path = os.path.join(dest_path_dir, str(data_index))
-    os.makedirs(dest_path, exist_ok=True)
-        
+    existing_dirs = [d for d in os.listdir(dest_path_dir) if os.path.isdir(os.path.join(dest_path_dir, d)) and d.isdigit()]
+    if existing_dirs:
+        max_index = max(int(d) for d in existing_dirs) + 1
+    else:
+        max_index = 1
+    dest_path = os.path.join(dest_path_dir, str(max_index))
+    os.makedirs(dest_path)
+    
     # 复制并重命名图片文件
     for index in range(1, len(new_actions) + 2):  # +2 因为通常有一张额外的截图
         screenshot_src = os.path.join(data_log_path, str(index), "screenshot.jpg")
