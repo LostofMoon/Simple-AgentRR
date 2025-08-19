@@ -13,7 +13,7 @@
 ## 🚀 快速开始
 
 ## 项目启动
-
+在根目录下运行指令
 ```bash
 python -m manual_collection.server
 ```
@@ -47,6 +47,10 @@ python -m manual_collection.server
    - 点击 **➡️ 下一条数据** 继续收集同类型任务的更多数据
    - 点击 **⏹️ 结束收集** 结束当前收集会话
 
+#### 放弃任务
+当想要放弃这一条数据时可以：
+   - 点击 **删除任务** 
+
 ### 界面功能说明
 
 #### 主要按钮
@@ -64,7 +68,7 @@ python -m manual_collection.server
 
 ## 📁 数据存储结构
 
-数据按照以下目录结构存储：
+数据存储在/manual_collection/data，按照以下结构：
 ```
 data/
 ├── <应用名称>/
@@ -106,6 +110,9 @@ data/
         {
             "type": "input",
             "text": "巨无霸"
+        },
+        {
+            "type": "done"
         }
     ]
 }
@@ -114,15 +121,11 @@ data/
 ## 📄 项目结构
 
 ```
-1-collect/
-├── app.py              # 主应用程序
-├── parse_xml.py        # XML解析工具
-├── requirements.txt    # Python依赖
-├── ADBKeyboard.apk    # ADB键盘应用
 ├── static/            # 前端静态文件
 │   ├── index.html     # 主页面
 │   ├── css/           # 样式文件
 │   └── js/            # JavaScript文件
 ├── data/              # 数据存储目录
-└── README.md          # 项目说明
+├── README.md          # 项目说明
+└── server.py          # 主应用程序
 ```
