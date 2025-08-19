@@ -3,7 +3,7 @@ import textwrap
 import cv2
 import numpy as np
 import os
-from annotation.check import compare_actions
+from annotation.utils.check import compare_actions
 
 import argparse
 from argparse import Namespace
@@ -246,22 +246,14 @@ def auto_annotate(root, chain, task_description, actions):
     print(f"[Reasoning] finished, saved to {react_json}")
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser(description='Auto annotation of GUI data')
-    # parser.add_argument('--data_path', type=str, default='data', help='root directory containing the data (default: data)')
-    # parser.add_argument('--model', type=str, required=True, help='name of the annotation model')
-    # parser.add_argument('--api_key', type=str, required=True, help='API key of the annotation model')
-    # parser.add_argument('--base_url', type=str, required=True, help='base URL of the annotation model')
+    parser = argparse.ArgumentParser(description='Auto annotation of GUI data')
+    parser.add_argument('--data_path', type=str, default='data', help='root directory containing the data (default: data)')
+    parser.add_argument('--model', type=str, required=True, help='name of the annotation model')
+    parser.add_argument('--api_key', type=str, required=True, help='API key of the annotation model')
+    parser.add_argument('--base_url', type=str, required=True, help='base URL of the annotation model')
 
-    # args = parser.parse_args()
-
-    args = Namespace(
-        data_path = r"D:\桌面\iPADS\大三暑期\data\general\1",
-        model = "gemini-2.5-pro-preview-06-05",
-        api_key="sk-rfCIGhxrzcdsMV4jC17e406bE56c47CbA5416068A62318D3",
-        base_url="http://ipads.chat.gpt:3006/v1"
-    )
+    args = parser.parse_args()
     
-
     model = ChatOpenAI(
         model=args.model,
         api_key=args.api_key,
