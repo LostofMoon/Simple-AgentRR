@@ -5,14 +5,14 @@
 ## 🛠️ 环境配置
 详情查看根目录下的README.md
 
-### 2. 手机配置
+### 手机配置
 - 在Android设备上安装项目根目录中的 `ADBKeyboard.apk` 文件
 - 使用USB数据线连接手机和电脑
 - 手机上会弹出USB调试授权提示，点击 **允许**
 
 ## 🚀 快速开始
 
-## 项目启动
+### 项目启动
 在根目录下运行指令
 ```bash
 python -m manual_collection.server
