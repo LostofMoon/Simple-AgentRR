@@ -27,6 +27,7 @@
 - QQ音乐: com.tencent.qqmusic
 - 网易云音乐: com.netease.cloudmusic
 - 酷狗音乐: com.kugou.android
+- 抖音: com.ss.android.ugc.aweme
 
 ## 任务要求
 1. 分析任务描述，选择最合适的应用来完成该任务
