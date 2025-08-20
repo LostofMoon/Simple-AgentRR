@@ -248,7 +248,15 @@ def task_in_app(app, old_task, task, device, data_dir, bbox_flag=True):
         logging.info(f"Decider response: \n{decider_response_str}")
 
         decider_response = json.loads(decider_response_str)
-        reacts.append(decider_response)
+        converted_item = {
+            "reasoning": decider_response["reasoning"],
+            "function": {
+                "name": decider_response["action"],
+                "parameters": decider_response["parameters"]
+            }
+        }
+        reacts.append(converted_item)
+
         add_msg({
             "role": "assistant",
             "content": decider_response["reasoning"]
