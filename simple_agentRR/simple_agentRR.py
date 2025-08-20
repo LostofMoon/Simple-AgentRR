@@ -417,7 +417,7 @@ def task_in_app(app, old_task, task, device, data_dir, bbox_flag=True):
         "app_name": app,
         "task_type": None,
         "old_task_description": old_task,
-        "new_task_description": task,
+        "task_description": task,
         "action_count": len(actions),
         "actions": actions
     }
