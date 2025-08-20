@@ -103,11 +103,12 @@ class AndroidDevice(Device):
 
 decider_client = None
 grounder_client = None
+rewriter_client = None
 general_client = None
 general_model = None
 
-def init(base_url, decider_port, grounder_port, general_url, general_model_name, general_api_key):
-    global decider_client, grounder_client, general_client, general_model, apps
+def init(base_url, decider_port, grounder_port, rewriter_port, general_url, general_model_name, general_api_key):
+    global decider_client, grounder_client, rewriter_client, general_client, general_model, apps
     decider_client = OpenAI(
         api_key = "0",
         base_url = f"{base_url}:{decider_port}/v1",
@@ -115,6 +116,10 @@ def init(base_url, decider_port, grounder_port, general_url, general_model_name,
     grounder_client = OpenAI(
         api_key = "0",
         base_url = f"{base_url}:{grounder_port}/v1",
+    )
+    rewriter_client = OpenAI(
+        api_key = "0",
+        base_url = f"{base_url}:{rewriter_port}/v1",
     )
     general_client = OpenAI(
         api_key = general_api_key,
@@ -434,18 +439,19 @@ def get_app_package_name(task_description):
     """根据任务描述获取需要启动的app包名和改写后的任务描述"""
     app_selection_prompt = app_selection_prompt_template.format(task_description=task_description)
     while True:
-        response_str = general_client.chat.completions.create(
-            model=general_model,
+        response_str = rewriter_client.chat.completions.create(
+            model="rewriter",
             messages=[
                 {
                     "role": "user",
-                    "content": app_selection_prompt
+                    "content": [
+                        {"type": "text", "text": app_selection_prompt},
+                    ]
                 }
             ]
         ).choices[0].message.content
-        
-        print(f"old task description: {task_description}")
-        print(f"应用选择响应: \n{response_str}")
+
+        logging.info(f"应用选择响应: \n{response_str}")
         
         pattern = re.compile(r"```json\n(.*)\n```", re.DOTALL)
         match = pattern.search(response_str)
@@ -462,7 +468,7 @@ def get_app_package_name(task_description):
 # for testing purposes
 if __name__ == "__main__":
 
-    init("http://localhost", 8000, 8001, "http://ipads.chat.gpt:3006", "google/gemini-2.5-pro", "sk-rfCIGhxrzcdsMV4jC17e406bE56c47CbA5416068A62318D3")
+    init("http://localhost", 8000, 8001, 8002, "http://ipads.chat.gpt:3006", "google/gemini-2.5-pro", "sk-rfCIGhxrzcdsMV4jC17e406bE56c47CbA5416068A62318D3")
 
     device = AndroidDevice()
     print(f"connect to device")
