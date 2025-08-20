@@ -31,7 +31,7 @@ def change_task_description(app_name, original_task):
             ])
             chain = prompt | model
             response = chain.invoke({
-                "sys_prompt": change_task_description_prompt,
+                "sys_prompt": change_task_description_prompt.replace("{app_name}", app_name if app_name else "").replace("{original_task}", original_task).replace("{count}", str(count)),
                 "user_message": f"请将任务'{original_task}'改写成{count}个版本" + (f"（前3条不带应用名称，后3条带应用名称）" if app_name else "（都不带应用名称）")
             })
 
