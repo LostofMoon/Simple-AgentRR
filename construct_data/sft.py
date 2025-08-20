@@ -8,33 +8,17 @@ import random
 import argparse
 import math
 
+from utils.load_md_prompt import load_prompt
+
 def calculate_index_weight(index, total_length):
-    """
-    1. 早期步骤(前30%)权重较低，避免过度采样
-    2. 中期步骤(30%-70%)权重逐渐增加
-    3. 后期步骤(70%+)权重较高，重点关注关键步骤
-    4. 最后几步权重最高，因为通常是完成任务的关键步骤
-    """
-    if total_length <= 1:
-        return 1
-    
-    # 计算相对位置 (0.0 到 1.0)
-    relative_position = (index - 1) / (total_length - 1)
-    
     # 分段权重计算
-    if relative_position <= 0.3:  # 前30%
+    if index <= 5:
         base_weight = 1
-    elif relative_position <= 0.7:  # 中30%-70%
-        base_weight = 1 + int((relative_position - 0.3) * 5)  # 1-3
-    else:  # 后30%
-        base_weight = 3 + int((relative_position - 0.7) * 6)  # 3-5
-    
-    # 对最后几步给予额外权重
-    if index >= total_length - 2:  # 最后3步
-        base_weight += 1
-    
-    # 最小权重为1，避免为0
-    return max(1, base_weight)
+    elif index <= 8:
+        base_weight = 1 + index // 4
+    else:
+        base_weight = 1 + index // 3
+    return base_weight
 
 @dataclass
 class AlpacaImageEntry:
@@ -43,23 +27,8 @@ class AlpacaImageEntry:
     images: List[str]
     input: str = ""
 
-executor_prompt = '''
-<image>
-Based on the screenshot, user's intent and the description of the target UI element, provide the coordinates of the element using **absolute coordinates**.
-User's intent: {reasoning}
-Target element's description: {description}
-Your output should be a JSON object with the following format:
-{{"coordinates": [x, y]}}
-'''.strip()
-
-executor_prompt_bbox = '''
-<image>
-Based on the screenshot, user's intent and the description of the target UI element, provide the bounding box of the element using **absolute coordinates**.
-User's intent: {reasoning}
-Target element's description: {description}
-Your output should be a JSON object with the following format:
-{{"bbox": [x1, y1, x2, y2]}}
-'''.strip()
+executor_prompt = load_prompt("grounder_coordinates.md")
+executor_prompt_bbox = load_prompt("grounder_bbox.md")
 
 decider_prompt = '''
 <image>
@@ -97,11 +66,13 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
     
     # 训练集
     reason_entries_train = []
+    shift_entries_train = []
     reason_no_history_entries_train = []
     grounder_entries_train = []
     
     # 验证集
     reason_entries_val = []
+    shift_entries_val = []
     reason_no_history_entries_val = []
     grounder_entries_val = []
 
@@ -172,10 +143,10 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
             
             output_dict = dict(reasoning=reasoning, action=action_type, parameters=param)
             output = json.dumps(output_dict, ensure_ascii=False)
-            
-            # 对input类型特殊处理
+                    
+            # partial_histories是当前action的前几个action
+            # 对input类和done类型特殊处理
             if action_type == "input" or action_type == "done":
-                # input类型需要至少min(3, total_history_length)的历史长度
                 min_history_length = min(3, len(history))
                 partial_histories = [history[i:] for i in range(len(history) + 1 - min_history_length)]
             else:
@@ -185,16 +156,16 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
 
             for partial_history in partial_histories:
                 if len(partial_history) == 0:
-                    history_str = "(No history)"
+                    partial_history_str = "(No history)"
                 else:
-                    history_str = "\n".join(f"{idx}. {h}" for idx, h in enumerate(partial_history, 1))
+                    partial_history_str = "\n".join(f"{idx}. {h}" for idx, h in enumerate(partial_history, 1))
 
                 if(isinstance(task_description, list)):
                     weight = calculate_index_weight(i, len(actions))
                     weight = min(weight, len(task_description))
                     random_tasks = random.sample(task_description, weight)
                     for task in random_tasks:
-                        instruction = decider_prompt.format(task=task, history=history_str)
+                        instruction = decider_prompt.format(task=task, history=partial_history_str)
                         entry = AlpacaImageEntry(
                             instruction=instruction,
                             output=output,
@@ -202,7 +173,7 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
                         )
                         partial_history_entries.append(entry)
                 else:
-                    instruction = decider_prompt.format(task=task_description, history=history_str)
+                    instruction = decider_prompt.format(task=task_description, history=partial_history_str)
                     entry = AlpacaImageEntry(
                         instruction=instruction,
                         output=output,
@@ -211,6 +182,29 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
                     partial_history_entries.append(entry)
 
             history.append(output)
+
+            shifted_history_entry = []
+            history_str = "\n".join(f"{idx}. {h}" for idx, h in enumerate(history, 1))
+            if(isinstance(task_description, list)):
+                weight = calculate_index_weight(i, len(actions))
+                weight = min(weight, len(task_description))
+                random_tasks = random.sample(task_description, weight)
+                for task in random_tasks:
+                    instruction = decider_prompt.format(task=task, history=history_str)
+                    entry = AlpacaImageEntry(
+                        instruction=instruction,
+                        output=output,
+                        images=[out_abspath]
+                    )
+                    shifted_history_entry.append(entry)
+            else:
+                instruction = decider_prompt.format(task=task_description, history=history_str)
+                entry = AlpacaImageEntry(
+                    instruction=instruction,
+                    output=output,
+                    images=[out_abspath]
+                )
+                shifted_history_entry.append(entry)
 
             # 有历史action训练集
             full_history_entry = partial_history_entries[0]
@@ -221,8 +215,10 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
             if is_train:
                 num = augment_rule.get("reason", augment_rule.get("other", 1))
                 reason_entries_train.extend((partial_history_entries + [full_history_entry]) * num)
+                shift_entries_train.extend(shifted_history_entry * num)
             else:
                 reason_entries_val.extend(partial_history_entries + [full_history_entry])
+                shift_entries_val.extend(shifted_history_entry)
 
             # 无历史action训练集 (input类型不生成no history数据)
             if action_type != "done" and action_type != "input":
@@ -327,7 +323,6 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
                 reasoning = react["reasoning"]
                 action = react["function"]["name"]
                 param = react["function"]["parameters"]
-                bbox = react.get("bbox", None)
                 augment_rule = augment_data(react, rules)
 
                 random_tasks = random.sample(tasks, 1)
@@ -341,48 +336,31 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
                         output=output,
                         images=[out_abspath]
                     )
-                    
-                    # 按比例分配到训练集和验证集（在增强前分配）
                     if is_train:
                         num = augment_rule.get("reason_no_history", augment_rule.get("other", 1))
                         reason_no_history_entries_train.extend([entry] * num)
                     else:
                         reason_no_history_entries_val.append(entry)
 
-                    # must use bbox for single-step data
-                    if bbox is not None and "target_element" in param:
-                        bbox = [int(x * factor) for x in bbox]
-                        output = json.dumps(dict(bbox=bbox))
-                        instruction = executor_prompt_bbox.format(reasoning=reasoning, description=param["target_element"])
-                        entry = AlpacaImageEntry(
-                            instruction=instruction,
-                            output=output,
-                            images=[out_abspath]
-                        )
-                        
-                        # 按比例分配到训练集和验证集（在增强前分配）
-                        if is_train:
-                            num = augment_rule.get("grounder", augment_rule.get("other", 1))
-                            grounder_entries_train.extend([entry] * num)
-                        else:
-                            grounder_entries_val.append(entry)
-
     # 合并训练集数据
+    shift_entries_train = random.sample(shift_entries_train, len(shift_entries_train) // 4)
+    shift_entries_val = random.sample(shift_entries_val, len(shift_entries_val) // 4)
+
     print(f"reason_entries_train: {len(reason_entries_train)}")
     print(f"reason_entries_no_history_train: {len(reason_no_history_entries_train)}")
+    print(f"shift_entries_train: {len(shift_entries_train)}")
     print(f"grounder_entries_train: {len(grounder_entries_train)}")
     
     data = {
         "reason_entries_train": len(reason_entries_train),
         "reason_entries_no_history_train": len(reason_no_history_entries_train),
+        "shift_entries_train": len(shift_entries_train),
         "grounder_entries_train": len(grounder_entries_train)
     }
 
     decider_entries_train = [asdict(entry) for entry in reason_entries_train]
     decider_entries_train.extend([asdict(entry) for entry in reason_no_history_entries_train])
-    # decider_entries_train_no_history = [asdict(entry) for entry in reason_no_history_entries_train]
-    # decider_entries_train_no_history = random.sample(decider_entries_train_no_history, int(0.25 * len(decider_entries_train_no_history)))
-    # decider_entries_train.extend(decider_entries_train_no_history)
+    decider_entries_train.extend([asdict(entry) for entry in shift_entries_train])
     random.shuffle(decider_entries_train)
     
     grounder_entries_train = [asdict(entry) for entry in grounder_entries_train]
@@ -391,6 +369,7 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
     # 合并验证集数据
     print(f"reason_entries_val: {len(reason_entries_val)}")
     print(f"reason_entries_no_history_val: {len(reason_no_history_entries_val)}")
+    print(f"shift_entries_val: {len(shift_entries_val)}")
     print(f"grounder_entries_val: {len(grounder_entries_val)}")
 
     # 添加验证集统计信息到data字典
@@ -402,6 +381,7 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
 
     decider_entries_val = [asdict(entry) for entry in reason_entries_val]
     decider_entries_val.extend([asdict(entry) for entry in reason_no_history_entries_val])
+    decider_entries_val.extend([asdict(entry) for entry in shift_entries_val])
     random.shuffle(decider_entries_val)
     
     grounder_entries_val_dict = [asdict(entry) for entry in grounder_entries_val]
@@ -429,7 +409,7 @@ if __name__ == "__main__":
     parser.add_argument("--ss_data_path", type=str, default="ss_data", help="root path of single-step data (default: ss_data)")
     parser.add_argument("--out_path", type=str, default="output", help="output path of train dataset (default: output)")
     parser.add_argument("--factor", type=float, default=0.5, help="resize factor for images (default: 0.5)")
-    parser.add_argument("--train_ratio", type=float, default=1, help="ratio of training data (default: 0.9)")
+    parser.add_argument("--train_ratio", type=float, default=0.9, help="ratio of training data (default: 0.9)")
     args = parser.parse_args()
     construct_ds(
         data_path=args.data_path,
