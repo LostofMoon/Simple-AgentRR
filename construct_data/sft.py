@@ -61,24 +61,46 @@ Your output should be a JSON object with the following format:
 {{"reasoning": "Your reasoning here", "action": "The next action (one of click, input, swipe, wait, done)", "parameters": {{"param1": "value1", ...}}}}
 '''.strip()
 
-def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_ratio=0.9):
+def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path, factor=0.5, train_ratio=0.9):
     os.makedirs(out_path, exist_ok=True)
     
     # 训练集
     reason_entries_train = []
     shift_entries_train = []
+    terminate_entries_train = []
     reason_no_history_entries_train = []
     grounder_entries_train = []
     
     # 验证集
     reason_entries_val = []
     shift_entries_val = []
+    terminate_entries_val = []
     reason_no_history_entries_val = []
     grounder_entries_val = []
 
     current_dir = os.getcwd()
     augment_config_path = os.path.join(current_dir, 'construct_data', 'augment_config.json')
     rules = load_augmentation_rules(augment_config_path)
+
+    unexpected_img_dir = os.path.abspath(args.unexpected_img_path)
+    unexpected_img_paths = os.listdir(unexpected_img_dir)
+    unexpected_img_paths = [os.path.join(unexpected_img_dir, img) for img in unexpected_img_paths]
+
+    unexpected_img_safe_abspaths = []
+    for unexpected_img_path in unexpected_img_paths:
+        pil_img = Image.open(unexpected_img_path)
+        width, height = pil_img.size
+        new_width = int(width * factor)
+        new_height = int(height * factor)
+        resized_img = pil_img.resize((new_width, new_height), Image.LANCZOS)
+
+        relative_path = os.path.relpath(unexpected_img_path, unexpected_img_dir)
+        safe_filename = relative_path.replace(os.sep, "_").replace(":", "_")
+        safe_filename = f"unexpected_{safe_filename}"
+        out_relpath = os.path.join(out_path, safe_filename)
+        resized_img.save(out_relpath)
+        out_abspath = os.path.abspath(out_relpath)
+        unexpected_img_safe_abspaths.append(out_abspath)
 
     for root, dirs, files in os.walk(data_path):
         if len(files) == 0:
@@ -143,7 +165,7 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
             
             output_dict = dict(reasoning=reasoning, action=action_type, parameters=param)
             output = json.dumps(output_dict, ensure_ascii=False)
-                    
+
             # partial_histories是当前action的前几个action
             # 对input类和done类型特殊处理
             if action_type == "input" or action_type == "done":
@@ -183,28 +205,85 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
 
             history.append(output)
 
-            shifted_history_entry = []
-            history_str = "\n".join(f"{idx}. {h}" for idx, h in enumerate(history, 1))
-            if(isinstance(task_description, list)):
-                weight = calculate_index_weight(i, len(actions))
-                weight = min(weight, len(task_description))
-                random_tasks = random.sample(task_description, weight)
-                for task in random_tasks:
-                    instruction = decider_prompt.format(task=task, history=history_str)
+            if action_type != "wait" and action_type != "done":
+                shifted_history_entry = []
+                terminate_history_entry = []
+                retry_list1 = [
+                    "应用未响应",
+                    "上一个操作没有成功",
+                    "操作未响应",
+                    "上一动作未正常执行"
+                ]
+                retry_list2 = [
+                    "需要重新执行上一个动作",
+                    "需要再执行一次上一个操作",
+                    "我需要进行重试",
+                ]
+
+                retry_reasoning = "，".join(map(random.choice, [retry_list1, retry_list2]))
+                retry_output_dict = dict(reasoning=retry_reasoning, action=action_type, parameters=param)
+                retry_output = json.dumps(retry_output_dict, ensure_ascii=False)
+
+                terminate_list1 = [
+                    "当前页面未按预期加载",
+                    "进入了错误的页面",
+                    "打开了不合预期的页面",
+                    "当前打开了错误页面",
+                    "当前页面不合预期"
+
+                ]
+                terminate_list2 = [
+                    "需要用户介入",
+                    "需要用户接管",
+                    "任务无法继续执行"
+                ]
+                terminate_list3 = [
+                    "任务提前结束",
+                    "中止任务执行"
+                ]
+
+                terminate_reasoning = "，".join(map(random.choice, [terminate_list1, terminate_list2, terminate_list3]))
+                terminate_output_dict = dict(reasoning=terminate_reasoning, action="done", parameters={})
+                terminate_output = json.dumps(terminate_output_dict, ensure_ascii=False)
+
+                history_str = "\n".join(f"{idx}. {h}" for idx, h in enumerate(history, 1))
+                if(isinstance(task_description, list)):
+                    weight = calculate_index_weight(i, len(actions))
+                    weight = min(weight, len(task_description))
+                    random_tasks = random.sample(task_description, weight)
+                    for task in random_tasks:
+                        instruction = decider_prompt.format(task=task, history=history_str)
+                        entry = AlpacaImageEntry(
+                            instruction=instruction,
+                            output=retry_output,
+                            images=[out_abspath]
+                        )
+                        shifted_history_entry.append(entry)
+
+                        unexpected_img_abspath = random.choice(unexpected_img_safe_abspaths)
+                        entry = AlpacaImageEntry(
+                            instruction=instruction,
+                            output=terminate_output,
+                            images=[unexpected_img_abspath]
+                        )
+                        terminate_history_entry.append(entry)
+                else:
+                    instruction = decider_prompt.format(task=task_description, history=history_str)
                     entry = AlpacaImageEntry(
                         instruction=instruction,
-                        output=output,
+                        output=retry_output,
                         images=[out_abspath]
                     )
                     shifted_history_entry.append(entry)
-            else:
-                instruction = decider_prompt.format(task=task_description, history=history_str)
-                entry = AlpacaImageEntry(
-                    instruction=instruction,
-                    output=output,
-                    images=[out_abspath]
-                )
-                shifted_history_entry.append(entry)
+
+                    
+                    unexpected_img_abspath = random.choice(unexpected_img_safe_abspaths)
+                    entry = AlpacaImageEntry(
+                        instruction=instruction,
+                        output=terminate_output,
+                        images=[unexpected_img_abspath]
+                    )
+                    terminate_history_entry.append(entry)
 
             # 有历史action训练集
             full_history_entry = partial_history_entries[0]
@@ -216,9 +295,11 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
                 num = augment_rule.get("reason", augment_rule.get("other", 1))
                 reason_entries_train.extend((partial_history_entries + [full_history_entry]) * num)
                 shift_entries_train.extend(shifted_history_entry * num)
+                terminate_entries_train.extend(terminate_history_entry * num)
             else:
                 reason_entries_val.extend(partial_history_entries + [full_history_entry])
                 shift_entries_val.extend(shifted_history_entry)
+                terminate_entries_val.extend(terminate_history_entry)
 
             # 无历史action训练集 (input类型不生成no history数据)
             if action_type != "done" and action_type != "input":
@@ -345,23 +426,28 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
     # 合并训练集数据
     shift_entries_train = random.sample(shift_entries_train, len(shift_entries_train) // 4)
     shift_entries_val = random.sample(shift_entries_val, len(shift_entries_val) // 4)
+    terminate_entries_train = random.sample(terminate_entries_train, len(terminate_entries_train) // 4)
+    terminate_entries_val = random.sample(terminate_entries_val, len(terminate_entries_val) // 4)
 
     print(f"reason_entries_train: {len(reason_entries_train)}")
     print(f"reason_entries_no_history_train: {len(reason_no_history_entries_train)}")
     print(f"shift_entries_train: {len(shift_entries_train)}")
+    print(f"terminate_entries_train: {len(terminate_entries_train)}")
     print(f"grounder_entries_train: {len(grounder_entries_train)}")
     
     data = {
         "reason_entries_train": len(reason_entries_train),
         "reason_entries_no_history_train": len(reason_no_history_entries_train),
         "shift_entries_train": len(shift_entries_train),
+        "terminate_entries_train": len(terminate_entries_train),
         "grounder_entries_train": len(grounder_entries_train)
     }
 
     decider_entries_train = [asdict(entry) for entry in reason_entries_train]
     decider_entries_train.extend([asdict(entry) for entry in reason_no_history_entries_train])
     decider_entries_train.extend([asdict(entry) for entry in shift_entries_train])
-    random.shuffle(decider_entries_train)
+    decider_entries_train.extend([asdict(entry) for entry in terminate_entries_train])
+    # random.shuffle(decider_entries_train)
     
     grounder_entries_train = [asdict(entry) for entry in grounder_entries_train]
     random.shuffle(grounder_entries_train)
@@ -370,18 +456,22 @@ def construct_ds(data_path, single_step_data_path, out_path, factor=0.5, train_r
     print(f"reason_entries_val: {len(reason_entries_val)}")
     print(f"reason_entries_no_history_val: {len(reason_no_history_entries_val)}")
     print(f"shift_entries_val: {len(shift_entries_val)}")
+    print(f"terminate_entries_val: {len(terminate_entries_val)}")
     print(f"grounder_entries_val: {len(grounder_entries_val)}")
 
     # 添加验证集统计信息到data字典
     data.update({
         "reason_entries_val": len(reason_entries_val),
         "reason_entries_no_history_val": len(reason_no_history_entries_val),
+        "shift_entries_val": len(shift_entries_val),
+        "terminate_entries_val": len(terminate_entries_val),
         "grounder_entries_val": len(grounder_entries_val)
     })
 
     decider_entries_val = [asdict(entry) for entry in reason_entries_val]
     decider_entries_val.extend([asdict(entry) for entry in reason_no_history_entries_val])
     decider_entries_val.extend([asdict(entry) for entry in shift_entries_val])
+    decider_entries_val.extend([asdict(entry) for entry in terminate_entries_val])
     random.shuffle(decider_entries_val)
     
     grounder_entries_val_dict = [asdict(entry) for entry in grounder_entries_val]
@@ -407,6 +497,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Training dataset construction with Alpaca format")
     parser.add_argument("--data_path", type=str, default="data", help="root path of raw data (default: data)")
     parser.add_argument("--ss_data_path", type=str, default="ss_data", help="root path of single-step data (default: ss_data)")
+    parser.add_argument("--unexpected_img_path", type=str, default="unexpected_img", help="root path of unexpected image data (default: unexpected_data)")
     parser.add_argument("--out_path", type=str, default="output", help="output path of train dataset (default: output)")
     parser.add_argument("--factor", type=float, default=0.5, help="resize factor for images (default: 0.5)")
     parser.add_argument("--train_ratio", type=float, default=0.9, help="ratio of training data (default: 0.9)")
@@ -414,6 +505,7 @@ if __name__ == "__main__":
     construct_ds(
         data_path=args.data_path,
         single_step_data_path=args.ss_data_path,
+        unexpected_img_path=args.unexpected_img_path,
         out_path=args.out_path,
         factor=args.factor,
         train_ratio=args.train_ratio,
