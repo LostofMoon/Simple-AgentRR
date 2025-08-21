@@ -7,7 +7,8 @@ conda activate agentRR
 conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia -y
 python -m pip install paddlepaddle-gpu==3.1.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
 pip install paddleocr==2.10.0 ultralytics transformers==4.47.0 Pillow opencv-python numpy scipy supervision langchain-openai langchain-core
-pip install fastapi uvicorn uiautomator2 pillow
+pip install openai uiautomator2 pillow
+pip install fastapi uvicorn
 
 for f in icon_detect/{train_args.yaml,model.pt,model.yaml} ; do huggingface-cli download microsoft/OmniParser-v2.0 "$f" --local-dir weights; done
 ```
