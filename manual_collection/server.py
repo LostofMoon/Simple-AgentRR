@@ -309,7 +309,7 @@ async def delete_current_data():
 
     try:
         current_dir = os.getcwd()
-        app_dir = os.path.join(current_dir, 'data', current_app_name)
+        app_dir = os.path.join(current_dir, 'manual_collection', 'data', current_app_name)
         task_type_dir = os.path.join(app_dir, current_task_type)
         data_dir = os.path.join(task_type_dir, str(currentDataIndex))
 
@@ -356,7 +356,9 @@ app_packages ={
 
     "QQ音乐": "com.tencent.qqmusic",
     "网易云音乐": "com.netease.cloudmusic",
-    "酷狗音乐": "com.kugou.android"
+    "酷狗音乐": "com.kugou.android",
+
+    "高德地图": "com.autonavi.minimap"
 }
 
 @app.post("/set_task_description")
