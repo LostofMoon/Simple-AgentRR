@@ -118,9 +118,9 @@ def construct_main_page_classification_ds(data_path, out_path, factor=0.5, train
     print(f"main_page_classification entries_val: {len(entries_val)}")
 
     with open(os.path.join(out_path, "main_page_train.json"), "w", encoding="utf-8") as f:
-        json.dump(entries_train, f, ensure_ascii=False)
+        json.dump([asdict(entry) for entry in entries_train], f, ensure_ascii=False)
     with open(os.path.join(out_path, "main_page_val.json"), "w", encoding="utf-8") as f:
-        json.dump(entries_val, f, ensure_ascii=False)
+        json.dump([asdict(entry) for entry in entries_val], f, ensure_ascii=False)
 
 
 def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path, factor=0.5, train_ratio=0.9):
