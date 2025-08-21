@@ -61,6 +61,68 @@ Your output should be a JSON object with the following format:
 {{"reasoning": "Your reasoning here", "action": "The next action (one of click, input, swipe, wait, done)", "parameters": {{"param1": "value1", ...}}}}
 '''.strip()
 
+main_page_classification_prompt = '''
+<image>
+Is this screenshot the main page of the current app? Your answer can only be "yes" or "no".
+'''
+
+def construct_main_page_classification_ds(data_path, out_path, factor=0.5, train_ratio=0.9):
+    if not os.path.exists(out_path):
+        raise RuntimeError(f"Output path {out_path} does not exist. Make sure out_path is the same as construct_ds")
+    entries_train = []
+    entries_val = []
+
+    main_pages = []
+    other_pages = []
+    for root, dirs, files in os.walk(data_path):
+        if len(files) == 0:
+            continue
+        if "react.json" not in files or "actions.json" not in files or "parse.error" in files:
+            continue
+        if "1.jpg" not in files:
+            continue
+        idx = 1
+        while f"{idx}.jpg" in files:
+            idx += 1
+        largest_idx = idx - 1
+        for i in range(1, largest_idx + 1):
+            img_path = os.path.join(root, f"{i}.jpg")
+            relative_path = os.path.relpath(img_path, data_path)
+            safe_filename = relative_path.replace(os.sep, "_").replace(":", "_")
+            safe_filename = f"main_{safe_filename}"
+            out_relpath = os.path.join(out_path, safe_filename)
+            out_abspath = os.path.abspath(out_relpath)
+            if not os.path.exists(out_abspath):
+                raise RuntimeError(f"Image {out_abspath} does not exist. Make sure out_path is the same as construct_ds")
+            if i == 1:
+                main_pages.append(out_abspath)
+            else:
+                other_pages.append(out_abspath)
+    other_pages = random.sample(other_pages, len(other_pages) // 2)
+    for pages in [main_pages, other_pages]:
+        output = "yes" if pages is main_pages else "no"
+        entries = []
+        for abspath in pages:
+            entry = AlpacaImageEntry(
+                instruction=main_page_classification_prompt,
+                output=output,
+                images=[abspath]
+            )
+            entries.append(entry)
+        random.shuffle(entries)
+        split_idx = int(len(entries) * train_ratio)
+        entries_train.extend(entries[:split_idx])
+        entries_val.extend(entries[split_idx:])
+
+    print(f"main_page_classification entries_train: {len(entries_train)}")
+    print(f"main_page_classification entries_val: {len(entries_val)}")
+
+    with open(os.path.join(out_path, "main_page_train.json"), "w", encoding="utf-8") as f:
+        json.dump(entries_train, f, ensure_ascii=False)
+    with open(os.path.join(out_path, "main_page_val.json"), "w", encoding="utf-8") as f:
+        json.dump(entries_val, f, ensure_ascii=False)
+
+
 def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path, factor=0.5, train_ratio=0.9):
     os.makedirs(out_path, exist_ok=True)
     
@@ -509,4 +571,10 @@ if __name__ == "__main__":
         out_path=args.out_path,
         factor=args.factor,
         train_ratio=args.train_ratio,
+    )
+    construct_main_page_classification_ds(
+        data_path=args.data_path,
+        out_path=args.out_path,
+        factor=args.factor,
+        train_ratio=args.train_ratio
     )
