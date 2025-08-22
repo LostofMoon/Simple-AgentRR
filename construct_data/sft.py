@@ -444,6 +444,8 @@ def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path
                 # i+1.jpg must exist since action_type is not done
                 cv2_img = cv2.imread(os.path.join(root, f"{i}.jpg"), cv2.IMREAD_GRAYSCALE)
                 next_cv2_img = cv2.imread(os.path.join(root, f"{i + 1}.jpg"), cv2.IMREAD_GRAYSCALE)
+                if cv2_img.shape != next_cv2_img.shape:
+                    next_cv2_img = cv2.resize(next_cv2_img, (cv2_img.shape[1], cv2_img.shape[0]))
                 ssim_value = ssim(cv2_img, next_cv2_img)
                 synthesize_retry = ssim_value < 0.9
 
