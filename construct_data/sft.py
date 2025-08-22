@@ -30,36 +30,8 @@ class AlpacaImageEntry:
 executor_prompt = load_prompt("grounder_coordinates.md")
 executor_prompt_bbox = load_prompt("grounder_bbox.md")
 
-decider_prompt = '''
-<image>
-You are a phone-use AI agent. Now your task is "{task}".
-Your action history is:
-{history}
-Please provide the next action based on the screenshot and your action history. You should do careful reasoning before providing the action.
-Your action space includes:
-- Name: click, Parameters: target_element (a high-level description of the UI element to click).
-- Name: swipe, Parameters: direction (one of UP, DOWN, LEFT, RIGHT).
-- Name: input, Parameters: text (the text to input).
-- Name: wait, Parameters: (no parameters, will wait for 1 second).
-- Name: done, Parameters: (no parameters).
-Your output should be a JSON object with the following format:
-{{"reasoning": "Your reasoning here", "action": "The next action (one of click, input, swipe, wait, done)", "parameters": {{"param1": "value1", ...}}}}
-'''.strip()
-
-decider_prompt_no_history = '''
-<image>
-You are a phone-use AI agent. Now your task is "{task}". Please provide the next action based on the screenshot.
-You should do careful reasoning before providing the action.
-Please provide the next action based on the screenshot and your action history. You should do careful reasoning before providing the action.
-Your action space includes:
-- Name: click, Parameters: target_element (a high-level description of the UI element to click).
-- Name: swipe, Parameters: direction (one of UP, DOWN, LEFT, RIGHT).
-- Name: input, Parameters: text (the text to input).
-- Name: wait, Parameters: (no parameters, will wait for 1 second).
-- Name: done, Parameters: (no parameters).
-Your output should be a JSON object with the following format:
-{{"reasoning": "Your reasoning here", "action": "The next action (one of click, input, swipe, wait, done)", "parameters": {{"param1": "value1", ...}}}}
-'''.strip()
+decider_prompt = load_prompt("decider.md")
+decider_prompt_no_history = load_prompt("decider_nohistory.md")
 
 main_page_classification_prompt = '''
 <image>
@@ -122,6 +94,142 @@ def construct_main_page_classification_ds(data_path, out_path, factor=0.5, train
     with open(os.path.join(out_path, "main_page_val.json"), "w", encoding="utf-8") as f:
         json.dump([asdict(entry) for entry in entries_val], f, ensure_ascii=False)
 
+def construct_ss_data(single_step_data_path, out_path, factor=0.5, train_ratio=0.9):
+    if not os.path.exists(single_step_data_path):
+        return
+
+    current_dir = os.getcwd()
+    augment_config_path = os.path.join(current_dir, 'construct_data', 'augment_config.json')
+    rules = load_augmentation_rules(augment_config_path)
+
+    decider_ss_path = os.path.join(single_step_data_path, "decider")
+    if os.path.exists(decider_ss_path):
+        decider_ss_entry_train = []
+        decider_ss_entry_val = []
+        
+        for root, dirs, files in os.walk(decider_ss_path):
+            if len(files) == 0:
+                continue
+            if "react.json" not in files:
+                continue
+            if "tasks.json" not in files:
+                continue
+
+            react_path = os.path.join(root, "react.json")
+            with open(react_path, "r", encoding="UTF-8") as f:
+                react_data = json.load(f)
+
+            tasks_path = os.path.join(root, "tasks.json")
+            with open(tasks_path, "r", encoding="UTF-8") as f:
+                tasks = json.load(f)
+
+            for i, react in enumerate(react_data, 1):
+                is_train = random.random() < train_ratio
+
+                img_path = os.path.join(root, f"{i}.jpg")
+                pil_img = Image.open(img_path)
+                width, height = pil_img.size
+                new_width = int(width * factor)
+                new_height = int(height * factor)
+                resized_img = pil_img.resize((new_width, new_height), Image.LANCZOS)
+
+                relative_path = os.path.relpath(img_path, single_step_data_path)
+                safe_filename = relative_path.replace(os.sep, "_").replace(":", "_")
+                safe_filename = f"ss_{safe_filename}"
+                out_relpath = os.path.join(out_path, safe_filename)
+                resized_img.save(out_relpath)
+                out_abspath = os.path.abspath(out_relpath)
+
+                reasoning = react["reasoning"]
+                action = react["function"]["name"]
+                param = react["function"]["parameters"]
+
+                random_tasks = random.sample(tasks, 1)
+
+                for task in random_tasks:
+                    instruction = decider_prompt_no_history.format(task=task)
+                    output_dict = dict(reasoning=reasoning, action=action, parameters=param)
+                    output = json.dumps(output_dict, ensure_ascii=False)
+                    entry = AlpacaImageEntry(
+                        instruction=instruction,
+                        output=output,
+                        images=[out_abspath]
+                    )
+                    if is_train:
+                        decider_ss_entry_train.extend([entry])
+                    else:
+                        decider_ss_entry_val.append(entry)
+
+    grounder_ss_path = os.path.join(single_step_data_path, "grounder")
+    if os.path.exists(grounder_ss_path):
+        grounder_ss_entry_train = []
+        grounder_ss_entry_val = []
+
+        for root, dirs, files in os.walk(grounder_ss_path):
+            if len(files) == 0:
+                continue
+            if "react.json" not in files:
+                continue
+
+            react_path = os.path.join(root, "react.json")
+            with open(react_path, "r", encoding="UTF-8") as f:
+                react_data = json.load(f)
+
+            for i, react in enumerate(react_data, 1):
+                is_train = random.random() < train_ratio
+
+                img_path = os.path.join(root, f"{i}.jpg")
+                pil_img = Image.open(img_path)
+                width, height = pil_img.size
+                new_width = int(width * factor)
+                new_height = int(height * factor)
+                resized_img = pil_img.resize((new_width, new_height), Image.LANCZOS)
+
+                relative_path = os.path.relpath(img_path, single_step_data_path)
+                safe_filename = relative_path.replace(os.sep, "_").replace(":", "_")
+                safe_filename = f"ss_{safe_filename}"
+                out_relpath = os.path.join(out_path, safe_filename)
+                resized_img.save(out_relpath)
+                out_abspath = os.path.abspath(out_relpath)
+
+                reasoning = react["reasoning"]
+                action = react["function"]["name"]
+                param = react["function"]["parameters"]
+
+                # grounder训练集
+                if action == "click":
+                    bbox = react["bbox"]
+                    x1, y1 ,x2 ,y2 = bbox
+                    x = (x1 + x2) // 2
+                    y = (y1 + y2) // 2
+                    coords = [int(x * factor), int(y * factor)]
+
+                    instruction = executor_prompt.format(reasoning=reasoning, description=param["target_element"])
+                    output = json.dumps(dict(coordinates=coords))
+                    entry = AlpacaImageEntry(
+                        instruction=instruction,
+                        output=output,
+                        images=[out_abspath]
+                    )
+                    if is_train:
+                        grounder_ss_entry_train.extend([entry])
+                    else:
+                        grounder_ss_entry_val.append(entry)
+
+                    bbox = [int(x * factor) for x in bbox]
+                    output = json.dumps(dict(bbox=bbox))
+                    instruction = executor_prompt_bbox.format(reasoning=reasoning, description=param["target_element"])
+                    entry = AlpacaImageEntry(
+                        instruction=instruction,
+                        output=output,
+                        images=[out_abspath]
+                    )
+                    if is_train:
+                        grounder_ss_entry_train.extend([entry])
+                    else:
+                        grounder_ss_entry_val.append(entry)
+
+    return decider_ss_entry_train, decider_ss_entry_val, grounder_ss_entry_train, grounder_ss_entry_val
 
 def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path, factor=0.5, train_ratio=0.9):
     os.makedirs(out_path, exist_ok=True)
@@ -144,7 +252,8 @@ def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path
     augment_config_path = os.path.join(current_dir, 'construct_data', 'augment_config.json')
     rules = load_augmentation_rules(augment_config_path)
 
-    unexpected_img_dir = os.path.abspath(args.unexpected_img_path)
+    #TODO: unexpected_img_path 不存在情况
+    unexpected_img_dir = os.path.abspath(unexpected_img_path)
     unexpected_img_paths = os.listdir(unexpected_img_dir)
     unexpected_img_paths = [os.path.join(unexpected_img_dir, img) for img in unexpected_img_paths]
 
@@ -431,59 +540,7 @@ def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path
                     else:
                         grounder_entries_val.append(entry)
 
-    if os.path.exists(single_step_data_path):
-        for root, dirs, files in os.walk(single_step_data_path):
-            if len(files) == 0:
-                continue
-            if "react.json" not in files:
-                continue
-
-            react_path = os.path.join(root, "react.json")
-            with open(react_path, "r", encoding="UTF-8") as f:
-                react_data = json.load(f)
-
-            tasks_path = os.path.join(root, "tasks.json")
-            with open(tasks_path, "r", encoding="UTF-8") as f:
-                tasks = json.load(f)
-
-            for i, react in enumerate(react_data, 1):
-                is_train = random.random() < train_ratio
-
-                img_path = os.path.join(root, f"{i}.jpg")
-                pil_img = Image.open(img_path)
-                width, height = pil_img.size
-                new_width = int(width * factor)
-                new_height = int(height * factor)
-                resized_img = pil_img.resize((new_width, new_height), Image.LANCZOS)
-
-                relative_path = os.path.relpath(img_path, single_step_data_path)
-                safe_filename = relative_path.replace(os.sep, "_").replace(":", "_")
-                safe_filename = f"ss_{safe_filename}"
-                out_relpath = os.path.join(out_path, safe_filename)
-                resized_img.save(out_relpath)
-                out_abspath = os.path.abspath(out_relpath)
-
-                reasoning = react["reasoning"]
-                action = react["function"]["name"]
-                param = react["function"]["parameters"]
-                augment_rule = augment_data(react, rules)
-
-                random_tasks = random.sample(tasks, 1)
-
-                for task in random_tasks:
-                    instruction = decider_prompt_no_history.format(task=task)
-                    output_dict = dict(reasoning=reasoning, action=action, parameters=param)
-                    output = json.dumps(output_dict, ensure_ascii=False)
-                    entry = AlpacaImageEntry(
-                        instruction=instruction,
-                        output=output,
-                        images=[out_abspath]
-                    )
-                    if is_train:
-                        num = augment_rule.get("reason_no_history", augment_rule.get("other", 1))
-                        reason_no_history_entries_train.extend([entry] * num)
-                    else:
-                        reason_no_history_entries_val.append(entry)
+    decider_ss_entry_train, decider_ss_entry_val, grounder_ss_entry_train, grounder_ss_entry_val = construct_ss_data(single_step_data_path, out_path, factor, train_ratio)
 
     # 合并训练集数据
     shift_entries_train = random.sample(shift_entries_train, len(shift_entries_train) // 4)
@@ -496,23 +553,30 @@ def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path
     print(f"shift_entries_train: {len(shift_entries_train)}")
     print(f"terminate_entries_train: {len(terminate_entries_train)}")
     print(f"grounder_entries_train: {len(grounder_entries_train)}")
-    
+    print(f"decider_ss_entry_train: {len(decider_ss_entry_train)}")
+    print(f"grounder_ss_entry_train: {len(grounder_ss_entry_train)}")
+    print(f"\n")
+
     data = {
         "reason_entries_train": len(reason_entries_train),
         "reason_entries_no_history_train": len(reason_no_history_entries_train),
         "shift_entries_train": len(shift_entries_train),
         "terminate_entries_train": len(terminate_entries_train),
-        "grounder_entries_train": len(grounder_entries_train)
+        "grounder_entries_train": len(grounder_entries_train),
+        "decider_ss_entry_train": len(decider_ss_entry_train),
+        "grounder_ss_entry_train": len(grounder_ss_entry_train)
     }
 
     decider_entries_train = [asdict(entry) for entry in reason_entries_train]
     decider_entries_train.extend([asdict(entry) for entry in reason_no_history_entries_train])
     decider_entries_train.extend([asdict(entry) for entry in shift_entries_train])
     decider_entries_train.extend([asdict(entry) for entry in terminate_entries_train])
+    decider_entries_train.extend([asdict(entry) for entry in decider_ss_entry_train])
     # random.shuffle(decider_entries_train)
     
     grounder_entries_train = [asdict(entry) for entry in grounder_entries_train]
-    random.shuffle(grounder_entries_train)
+    grounder_entries_train.extend([asdict(entry) for entry in grounder_ss_entry_train])
+    # random.shuffle(grounder_entries_train)
     
     # 合并验证集数据
     print(f"reason_entries_val: {len(reason_entries_val)}")
@@ -520,6 +584,8 @@ def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path
     print(f"shift_entries_val: {len(shift_entries_val)}")
     print(f"terminate_entries_val: {len(terminate_entries_val)}")
     print(f"grounder_entries_val: {len(grounder_entries_val)}")
+    print(f"decider_ss_entry_val: {len(decider_ss_entry_val)}")
+    print(f"grounder_ss_entry_val: {len(grounder_ss_entry_val)}")
 
     # 添加验证集统计信息到data字典
     data.update({
@@ -527,17 +593,21 @@ def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path
         "reason_entries_no_history_val": len(reason_no_history_entries_val),
         "shift_entries_val": len(shift_entries_val),
         "terminate_entries_val": len(terminate_entries_val),
-        "grounder_entries_val": len(grounder_entries_val)
+        "grounder_entries_val": len(grounder_entries_val),
+        "decider_ss_entry_val": len(decider_ss_entry_val),
+        "grounder_ss_entry_val": len(grounder_ss_entry_val)
     })
 
     decider_entries_val = [asdict(entry) for entry in reason_entries_val]
     decider_entries_val.extend([asdict(entry) for entry in reason_no_history_entries_val])
     decider_entries_val.extend([asdict(entry) for entry in shift_entries_val])
     decider_entries_val.extend([asdict(entry) for entry in terminate_entries_val])
-    random.shuffle(decider_entries_val)
+    decider_entries_val.extend([asdict(entry) for entry in decider_ss_entry_val])
+    # random.shuffle(decider_entries_val)
     
     grounder_entries_val_dict = [asdict(entry) for entry in grounder_entries_val]
-    random.shuffle(grounder_entries_val_dict)
+    grounder_entries_val_dict.extend([asdict(entry) for entry in grounder_ss_entry_val])
+    # random.shuffle(grounder_entries_val_dict)
 
     # 保存训练集
     with open(os.path.join(out_path, f"general_decider_train.json"), "w", encoding="UTF-8") as f:
