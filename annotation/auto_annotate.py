@@ -290,14 +290,16 @@ if __name__ == "__main__":
         
             with open(actions_json, 'r', encoding='utf-8') as file:
                 data = json.load(file)
+            if "task_description" not in data:
+                raise Exception("No task_description in actions.json")
             task_description = data.get("task_description")
             actions = data.get("actions")
 
             # 不要随意开启这个，ocr有风险
-            # actions = add_bounds_to_action(root, actions)
-            # data["actions"] = actions
-            # with open(actions_json, 'w', encoding='utf-8') as file:
-            #     json.dump(data, file, ensure_ascii=False, indent=4)
+            actions = add_bounds_to_action(root, actions)
+            data["actions"] = actions
+            with open(actions_json, 'w', encoding='utf-8') as file:
+                json.dump(data, file, ensure_ascii=False, indent=4)
             
             visual_prompt(root, actions)
             auto_annotate(root, chain, task_description, actions)
