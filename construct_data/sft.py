@@ -1,4 +1,6 @@
 import os, json, shutil
+from skimage.metrics import structural_similarity as ssim
+import cv2
 from construct_data.util import load_augmentation_rules, augment_data
 from dataclasses import dataclass, asdict
 from typing import List, Dict
@@ -386,32 +388,18 @@ def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path
 
             history.append(output)
 
-            if action_type != "wait" and action_type != "done" and action_type != "swipe":
-                shifted_history_entry = []
-                terminate_history_entry = []
-                retry_list1 = [
-                    "应用未响应",
-                    "上一个操作没有成功",
-                    "操作未响应",
-                    "上一动作未正常执行"
-                ]
-                retry_list2 = [
-                    "需要重新执行上一个动作",
-                    "需要再执行一次上一个操作",
-                    "我需要进行重试",
-                ]
+            shifted_history_entry = []
+            terminate_history_entry = []
 
-                retry_reasoning = "，".join(map(random.choice, [retry_list1, retry_list2]))
-                retry_output_dict = dict(reasoning=retry_reasoning, action=action_type, parameters=param)
-                retry_output = json.dumps(retry_output_dict, ensure_ascii=False)
-
+            synthesize_terminate = action_type != "wait" and action_type != "done" and action_type != "swipe"
+            # synthesize terminate samples
+            if synthesize_terminate:
                 terminate_list1 = [
                     "当前页面未按预期加载",
                     "进入了错误的页面",
                     "打开了不合预期的页面",
                     "当前打开了错误页面",
                     "当前页面不合预期"
-
                 ]
                 terminate_list2 = [
                     "需要用户介入",
@@ -433,13 +421,6 @@ def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path
                     random_tasks = random.sample(task_description, weight)
                     for task in random_tasks:
                         instruction = decider_prompt.format(task=task, history=history_str)
-                        entry = AlpacaImageEntry(
-                            instruction=instruction,
-                            output=retry_output,
-                            images=[out_abspath]
-                        )
-                        shifted_history_entry.append(entry)
-
                         unexpected_img_abspath = random.choice(unexpected_img_safe_abspaths)
                         entry = AlpacaImageEntry(
                             instruction=instruction,
@@ -449,14 +430,6 @@ def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path
                         terminate_history_entry.append(entry)
                 else:
                     instruction = decider_prompt.format(task=task_description, history=history_str)
-                    entry = AlpacaImageEntry(
-                        instruction=instruction,
-                        output=retry_output,
-                        images=[out_abspath]
-                    )
-                    shifted_history_entry.append(entry)
-
-                    
                     unexpected_img_abspath = random.choice(unexpected_img_safe_abspaths)
                     entry = AlpacaImageEntry(
                         instruction=instruction,
@@ -464,6 +437,53 @@ def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path
                         images=[unexpected_img_abspath]
                     )
                     terminate_history_entry.append(entry)
+
+            synthesize_retry = synthesize_terminate
+            if synthesize_retry:
+                # i+1.jpg must exist since action_type is not done
+                cv2_img = cv2.imread(os.path.join(root, f"{i}.jpg"), cv2.IMREAD_GRAYSCALE)
+                next_cv2_img = cv2.imread(os.path.join(root, f"{i + 1}.jpg"), cv2.IMREAD_GRAYSCALE)
+                ssim_value = ssim(cv2_img, next_cv2_img)
+                synthesize_retry = ssim_value < 0.9
+
+            # synthesize retry samples
+            if synthesize_retry:
+                retry_list1 = [
+                    "应用未响应",
+                    "上一个操作没有成功",
+                    "操作未响应",
+                    "上一动作未正常执行"
+                ]
+                retry_list2 = [
+                    "需要重新执行上一个动作",
+                    "需要再执行一次上一个操作",
+                    "我需要进行重试",
+                ]
+
+                retry_reasoning = "，".join(map(random.choice, [retry_list1, retry_list2]))
+                retry_output_dict = dict(reasoning=retry_reasoning, action=action_type, parameters=param)
+                retry_output = json.dumps(retry_output_dict, ensure_ascii=False)
+
+                history_str = "\n".join(f"{idx}. {h}" for idx, h in enumerate(history, 1))
+                if(isinstance(task_description, list)):
+                    weight = 1
+                    random_tasks = random.sample(task_description, weight)
+                    for task in random_tasks:
+                        instruction = decider_prompt.format(task=task, history=history_str)
+                        entry = AlpacaImageEntry(
+                            instruction=instruction,
+                            output=retry_output,
+                            images=[out_abspath]
+                        )
+                        shifted_history_entry.append(entry)
+                else:
+                    instruction = decider_prompt.format(task=task_description, history=history_str)
+                    entry = AlpacaImageEntry(
+                        instruction=instruction,
+                        output=retry_output,
+                        images=[out_abspath]
+                    )
+                    shifted_history_entry.append(entry)
 
             # 有历史action训练集
             full_history_entry = partial_history_entries[0]
