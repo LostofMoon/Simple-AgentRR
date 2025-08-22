@@ -8,7 +8,17 @@ import random
 import argparse
 import math
 
-from utils.load_md_prompt import load_prompt
+# from utils.load_md_prompt import load_prompt
+
+def load_prompt(md_name):
+    """从markdown文件加载应用选择prompt模板"""
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    prompt_file = os.path.join(current_dir, "..", "prompts", md_name)
+
+    with open(prompt_file, "r", encoding="utf-8") as f:
+        content = f.read()
+    content = content.replace("````markdown", "").replace("````", "")
+    return content.strip()
 
 def calculate_index_weight(index, total_length):
     # 分段权重计算
@@ -376,7 +386,7 @@ def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path
 
             history.append(output)
 
-            if action_type != "wait" and action_type != "done":
+            if action_type != "wait" and action_type != "done" and action_type != "swipe":
                 shifted_history_entry = []
                 terminate_history_entry = []
                 retry_list1 = [
@@ -419,8 +429,7 @@ def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path
 
                 history_str = "\n".join(f"{idx}. {h}" for idx, h in enumerate(history, 1))
                 if(isinstance(task_description, list)):
-                    weight = calculate_index_weight(i, len(actions))
-                    weight = min(weight, len(task_description))
+                    weight = 1
                     random_tasks = random.sample(task_description, weight)
                     for task in random_tasks:
                         instruction = decider_prompt.format(task=task, history=history_str)
@@ -543,10 +552,10 @@ def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path
     decider_ss_entry_train, decider_ss_entry_val, grounder_ss_entry_train, grounder_ss_entry_val = construct_ss_data(single_step_data_path, out_path, factor, train_ratio)
 
     # 合并训练集数据
-    shift_entries_train = random.sample(shift_entries_train, len(shift_entries_train) // 4)
-    shift_entries_val = random.sample(shift_entries_val, len(shift_entries_val) // 4)
-    terminate_entries_train = random.sample(terminate_entries_train, len(terminate_entries_train) // 4)
-    terminate_entries_val = random.sample(terminate_entries_val, len(terminate_entries_val) // 4)
+    shift_entries_train = random.sample(shift_entries_train, len(shift_entries_train) // 8)
+    shift_entries_val = random.sample(shift_entries_val, len(shift_entries_val) // 8)
+    terminate_entries_train = random.sample(terminate_entries_train, len(terminate_entries_train) // 5)
+    terminate_entries_val = random.sample(terminate_entries_val, len(terminate_entries_val) // 5)
 
     print(f"reason_entries_train: {len(reason_entries_train)}")
     print(f"reason_entries_no_history_train: {len(reason_no_history_entries_train)}")
