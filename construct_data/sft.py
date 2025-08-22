@@ -9,6 +9,7 @@ from PIL import Image
 import random
 import argparse
 import math
+from tqdm import tqdm
 
 # from utils.load_md_prompt import load_prompt
 
@@ -119,7 +120,7 @@ def construct_ss_data(single_step_data_path, out_path, factor=0.5, train_ratio=0
         decider_ss_entry_train = []
         decider_ss_entry_val = []
         
-        for root, dirs, files in os.walk(decider_ss_path):
+        for root, dirs, files in tqdm(os.walk(decider_ss_path), desc="constructing single step decider dataset"):
             if len(files) == 0:
                 continue
             if "react.json" not in files:
@@ -177,7 +178,7 @@ def construct_ss_data(single_step_data_path, out_path, factor=0.5, train_ratio=0
         grounder_ss_entry_train = []
         grounder_ss_entry_val = []
 
-        for root, dirs, files in os.walk(grounder_ss_path):
+        for root, dirs, files in tqdm(os.walk(grounder_ss_path), desc="constructing single step grounder dataset"):
             if len(files) == 0:
                 continue
             if "react.json" not in files:
@@ -285,7 +286,7 @@ def construct_ds(data_path, single_step_data_path, unexpected_img_path, out_path
         out_abspath = os.path.abspath(out_relpath)
         unexpected_img_safe_abspaths.append(out_abspath)
 
-    for root, dirs, files in os.walk(data_path):
+    for root, dirs, files in tqdm(os.walk(data_path), desc="constructing dataset"):
         if len(files) == 0:
             continue
         if "actions.json" not in files or "react.json" not in files or "parse.error" in files:
