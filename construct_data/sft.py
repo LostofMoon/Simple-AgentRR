@@ -115,11 +115,14 @@ def construct_ss_data(single_step_data_path, out_path, factor=0.5, train_ratio=0
     augment_config_path = os.path.join(current_dir, 'construct_data', 'augment_config.json')
     rules = load_augmentation_rules(augment_config_path)
 
+    # 初始化所有返回变量
+    decider_ss_entry_train = []
+    decider_ss_entry_val = []
+    grounder_ss_entry_train = []
+    grounder_ss_entry_val = []
+
     decider_ss_path = os.path.join(single_step_data_path, "decider")
     if os.path.exists(decider_ss_path):
-        decider_ss_entry_train = []
-        decider_ss_entry_val = []
-        
         for root, dirs, files in tqdm(os.walk(decider_ss_path), desc="constructing single step decider dataset"):
             if len(files) == 0:
                 continue
@@ -175,9 +178,6 @@ def construct_ss_data(single_step_data_path, out_path, factor=0.5, train_ratio=0
 
     grounder_ss_path = os.path.join(single_step_data_path, "grounder")
     if os.path.exists(grounder_ss_path):
-        grounder_ss_entry_train = []
-        grounder_ss_entry_val = []
-
         for root, dirs, files in tqdm(os.walk(grounder_ss_path), desc="constructing single step grounder dataset"):
             if len(files) == 0:
                 continue
