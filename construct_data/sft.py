@@ -142,6 +142,8 @@ def construct_ss_data(single_step_data_path, out_path, factor=0.5, train_ratio=0
             for i, react in enumerate(react_data, 1):
                 is_train = random.random() < train_ratio
 
+                augment_rule = augment_data(react, rules)
+
                 img_path = os.path.join(root, f"{i}.jpg")
                 pil_img = Image.open(img_path)
                 width, height = pil_img.size
@@ -172,7 +174,8 @@ def construct_ss_data(single_step_data_path, out_path, factor=0.5, train_ratio=0
                         images=[out_abspath]
                     )
                     if is_train:
-                        decider_ss_entry_train.extend([entry])
+                        num = augment_rule.get("reason_no_history", augment_rule.get("other", 1))
+                        decider_ss_entry_train.extend([entry] * num)
                     else:
                         decider_ss_entry_val.append(entry)
 
@@ -238,7 +241,8 @@ def construct_ss_data(single_step_data_path, out_path, factor=0.5, train_ratio=0
                         images=[out_abspath]
                     )
                     if is_train:
-                        grounder_ss_entry_train.extend([entry])
+                        num = augment_rule.get("grounder", augment_rule.get("other", 1))
+                        grounder_ss_entry_train.extend([entry] * num)
                     else:
                         grounder_ss_entry_val.append(entry)
 
