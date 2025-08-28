@@ -1,4 +1,4 @@
-# 🎯 Simple-AgentRR 智能体模块
+# Simple-AgentRR 智能体模块
 
 这是项目的核心模块，实现了一个能够理解自然语言指令并在移动设备上自动执行任务的AI智能体。智能体使用多模态大语言模型来理解屏幕内容并做出操作决策。
 
@@ -9,7 +9,7 @@ vllm serve decider/ --port 8000
 vllm serve grounder/ --port 8001
 ```
 
-## 🚀 快速开始
+## 快速开始
 
 ### 环境配置
 详情查看根目录下的README.md
