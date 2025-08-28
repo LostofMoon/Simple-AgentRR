@@ -19,7 +19,8 @@ Auxiliary information is also annotated in the screenshots:
 2. **INPUT `<text>`**: The user typed the text `<text>` using the keyboard. The text can contain characters in any language. The action only happens when the user has already clicked on a search bar or a text input field, and the keyboard is activated.
 3. **SWIPE [x1,y1] to [x2,y2]**: The user swiped from the position [x1,y1] to the position [x2,y2]. The meaning of x1, y1, x2, and y2 is the same as in the CLICK action.
 4. **DONE**: The user has successfully completed the assigned task. This action indicates that all required objectives have been accomplished and no further interaction is needed.
-
+5. **LONG PRESS [x,y]**: The user performed a long press on the screen at the position [x,y]. This action is typically used to trigger context menus, drag operations, or special functions. The coordinate system is the same as in the CLICK action.
+6. **OPEN APP `<app name>`**: The user opened an application. The `<app name>` is the name of the application that was launched or opened by the user.
 ## Output
 
 Each screenshot contains auxiliary information about the action, and you must analyze each screenshot and provide **the matched reasoning for the action**, which must match the user's action. Each screenshot must have a matched reasoning, **neither too much nor too little**.
@@ -75,6 +76,32 @@ The functions that the ReAct agent can call are as follows:
         "name": "done",
         "description": "Indicate that the assigned task has been successfully completed",
         "parameters": {{}}
+    }},
+    {{
+        "name": "long_press",
+        "description": "Perform a long press (long click) on the screen at the target UI element",
+        "parameters": {{
+            "properties": {{
+                "target_element": {{
+                    "type": "string",
+                    "description": "The description of the target UI element to long press, which should contain enough information to locate the element without ambiguity. Possible information includes the element type, the content, the relative position, the color, the parent element, the order as a list item, etc."
+                }}
+            }},
+            "required": ["target_element"]
+        }}
+    }},
+    {{
+        "name": "open_app",
+        "description": "Open an application",
+        "parameters": {{
+            "properties": {{
+                "app_name": {{
+                    "type": "string",
+                    "description": "The name of the application to open"
+                }}
+            }},
+            "required": ["app_name"]
+        }}
     }}
 ]
 ```
