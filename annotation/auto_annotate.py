@@ -106,7 +106,11 @@ def add_bounds_to_action(root, actions):
             img_path = os.path.join(root, f"{i + 1}.jpg")
             if not os.path.exists(img_path):
                 raise Exception(f"[Add Bounds] Image not found: {img_path}")
-                            
+                   
+            # actions[i]["bounds"] = None         
+            # bounds_list = extract_all_bounds(img_path)
+            # actions[i]["bounds"] = find_clicked_element(bounds_list, action["position_x"], action["position_y"])
+
             bounds_list = extract_all_bounds(img_path)
             if "bounds" in action and action["bounds"]:
                 bounds_list.append(action["bounds"])
@@ -149,6 +153,13 @@ def visual_prompt(root, actions):
             text = f"SWIPE [{int(action['press_position_x'])}, {int(action['press_position_y'])}] to [{int(action['release_position_x'])}, {int(action['release_position_y'])}]"
         elif action["type"] == "done":
             text = f"DONE"
+        elif action["type"] == "long_press":
+            text = f"LONG PRESS [{int(action['position_x'])}, {int(action['position_y'])}]"
+        elif action["type"] == "open_app":
+            text = f"OPEN APP {action['app_name']}"
+        else:
+            raise Exception(f"[Visual Prompt] Unknown action type: {action['type']}")
+        
         text_width, text_height = draw.textbbox((0, 0), text, font=font)[2:]
         draw.text((img.width / 2 - text_width / 2, 0), text, fill="red", font=font)
         img.save(save_path)
@@ -157,7 +168,7 @@ def visual_prompt(root, actions):
         bounds_path = os.path.join(root, f"{i + 1}_bounds.jpg")
         img_bounds = Image.open(save_path)
         draw_bounds = ImageDraw.Draw(img_bounds)
-        if action["type"] == "click":
+        if action["type"] == "click" or action["type"] == "long_press":
             if "bounds" in action and action["bounds"]:
                 draw_bounds.rectangle(action["bounds"], outline='red', width=5)
                 img_bounds.save(bounds_path)
@@ -219,6 +230,10 @@ def auto_annotate(root, chain, task_description, actions):
             reasoning_count = len(data)
             if(len(image_data) != reasoning_count):
                 raise Exception(f"[Invalid reasoning count]")
+            react_json = os.path.join(root, "temp.json")
+            with open(react_json, "w", encoding="UTF-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+
             compare_actions(actions, data)
 
         except Exception as e:
@@ -237,11 +252,11 @@ def auto_annotate(root, chain, task_description, actions):
     #     if isinstance(item, dict):
     #         item['action_index'] = i + 1
 
+    compare_actions(actions, data)
+
     react_json = os.path.join(root, "react.json")
     with open(react_json, "w", encoding="UTF-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
-
-    compare_actions(actions, data)
 
     print(f"[Reasoning] finished, saved to {react_json}")
 
@@ -296,10 +311,10 @@ if __name__ == "__main__":
             actions = data.get("actions")
 
             # 不要随意开启这个，ocr有风险
-            actions = add_bounds_to_action(root, actions)
-            data["actions"] = actions
-            with open(actions_json, 'w', encoding='utf-8') as file:
-                json.dump(data, file, ensure_ascii=False, indent=4)
+            # actions = add_bounds_to_action(root, actions)
+            # data["actions"] = actions
+            # with open(actions_json, 'w', encoding='utf-8') as file:
+            #     json.dump(data, file, ensure_ascii=False, indent=4)
             
             visual_prompt(root, actions)
             auto_annotate(root, chain, task_description, actions)

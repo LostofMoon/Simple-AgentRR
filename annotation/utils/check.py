@@ -3,10 +3,18 @@ direction_mapping = {
     "向下滑动": "DOWN",
     "向左滑动": "LEFT",
     "向右滑动": "RIGHT",
+    "从下往上滑动": "UP",
+    "从上往下滑动": "DOWN",
+    "从右往左滑动": "LEFT",
+    "从左往右滑动": "RIGHT",
     "向上滚动": "UP",
     "向下滚动": "DOWN",
     "向左滚动": "LEFT",
-    "向右滚动": "RIGHT"
+    "向右滚动": "RIGHT",
+    "从下往上滚动": "UP",
+    "从上往下滚动": "DOWN",
+    "从右往左滚动": "LEFT",
+    "从左往右滚动": "RIGHT",
 }
 
 # 前者是actions.json 后者是react.json 对应的解析内容
