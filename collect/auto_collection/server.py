@@ -12,8 +12,9 @@ import sys
 import json
 from datetime import datetime
 from openai import OpenAI
+import argparse
 
-from auto_collection.utils.draw_bounds import process_folder
+from collect.auto_collection.utils.draw_bounds import process_folder
 
 device = None  # 设备连接对象
 hierarchy = None  # 层次结构数据
@@ -22,12 +23,12 @@ data_index = 1  # 数据索引
 operation_history = []  # 操作历史记录
 logger = None  # 日志记录器
 
-model = "gemini-2.5-pro-preview-06-05"
-api_key = "sk-rfCIGhxrzcdsMV4jC17e406bE56c47CbA5416068A62318D3"
-client = OpenAI(
-    api_key = api_key,
-    base_url= "http://ipads.chat.gpt:3006/v1"
-)
+# 全局配置变量，将由命令行参数设置
+model = None
+api_key = None
+base_url = None
+max_steps = 15
+client = None
 
 # action_dir 是存储的目录
 def get_current_hierarchy_and_screenshot(action_dir, sleep_time = 0):
@@ -160,8 +161,8 @@ def do_task(task_description, data_dir):
         action_dir = os.path.join(data_dir, str(action_index))
         get_current_hierarchy_and_screenshot(action_dir)
 
-        if(action_count > 15):
-            logger.info(f"任务步骤超过上限，停止执行")
+        if(action_count > max_steps):
+            logger.info(f"任务步骤超过上限({max_steps})，停止执行")
             return
 
         if action_count == 0:
@@ -420,7 +421,7 @@ def change_auto_data(data_log_path, index):
     }
 
     current_dir = os.getcwd()
-    dest_path_dir = os.path.join(current_dir, 'auto_collection', 'data')
+    dest_path_dir = os.path.join(current_dir, 'collect', 'auto_collection', 'data')
     if not os.path.exists(dest_path_dir):
         os.makedirs(dest_path_dir)
     existing_dirs = [d for d in os.listdir(dest_path_dir) if os.path.isdir(os.path.join(dest_path_dir, d)) and d.isdigit()]
@@ -443,16 +444,36 @@ def change_auto_data(data_log_path, index):
         json.dump(data, file, ensure_ascii=False, indent=4)
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Auto collection of GUI data')
+    parser.add_argument('--model', type=str, required=True, help='name of the LLM model')
+    parser.add_argument('--api_key', type=str, required=True, help='API key for the LLM model')
+    parser.add_argument('--base_url', type=str, required=True, help='base URL for the LLM model API')
+    parser.add_argument('--max_steps', type=int, default=15, help='maximum steps per task (default: 15)')
+
+    args = parser.parse_args()
+    
+    # 设置全局配置
+    model = args.model
+    api_key = args.api_key
+    base_url = args.base_url
+    max_steps = args.max_steps
+    
+    # 初始化OpenAI客户端
+    client = OpenAI(
+        api_key=api_key,
+        base_url=base_url
+    )
+    
     device = u2.connect()
     # 创建数据目录
     current_dir = os.getcwd()
-    session_base_dir = os.path.join(current_dir, 'auto_collection')
+    session_base_dir = os.path.join(current_dir, 'collect', 'auto_collection')
     data_base_dir = os.path.join(session_base_dir, 'data_log')
     if not os.path.exists(data_base_dir):
         os.makedirs(data_base_dir)
 
     # 读取任务列表
-    task_json_path = os.path.join(current_dir, "auto_collection", "task.json")
+    task_json_path = os.path.join(current_dir, "collect", "auto_collection", "task.json")
     with open(task_json_path, "r", encoding="utf-8") as f:
         task_list = json.load(f)
 
