@@ -132,8 +132,8 @@ python -m collect.auto.server --model <模型名称> --api_key <API密钥> --bas
 3. 自动保存数据到指定目录
 
 **存储数据格式：**
-- 原始日志数据存储在 `/collect/auto/data_log/` 
-- 转换后的标准格式数据存储在 `/collect/auto/data/`
+- 原始日志数据存储在 `collect/auto/data_log/` 
+- 转换后的标准格式数据存储在 `collect/auto/data/`
 - 数据结构与手动收集保持一致，包含截图序列和 `actions.json` 文件
 
 ## 数据标注

@@ -11,32 +11,5 @@
             "grounder": 1,
             "other": 1
         }
-    },
-    {
-        "dir": [
-            "function",
-            "parameters",
-            "target_element"
-        ],
-        "pattern": "删除",
-        "multiplier": {
-            "reason": 5,
-            "reason_no_history": 5,
-            "grounder": 5,
-            "other": 1
-        }
-    },
-    {
-        "dir": [
-            "function",
-            "name"
-        ],
-        "pattern": "wait",
-        "multiplier": {
-            "reason": 1,
-            "reason_no_history": 30,
-            "grounder": 1,
-            "other": 1
-        }
     }
 ]

@@ -421,13 +421,12 @@ if __name__ == "__main__":
     device = AndroidDevice()
     print(f"connect to device")
 
-    current_dir = os.getcwd()
-    data_base_dir = os.path.join(current_dir, 'data')
+    data_base_dir = os.path.join(os.path.dirname(__file__), 'data')
     if not os.path.exists(data_base_dir):
         os.makedirs(data_base_dir)
 
     # 读取任务列表
-    task_json_path = os.path.join(current_dir, "simple_agentRR", "task.json")
+    task_json_path = os.path.join(os.path.dirname(__file__), "task.json")
     with open(task_json_path, "r", encoding="utf-8") as f:
         task_list = json.load(f)
     

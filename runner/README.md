@@ -1,6 +1,6 @@
-## Runner
+# Agent Runner
 
-### MobiMind-Agent
+## MobiAgent Runner
 
 **支持功能**
 1. 论坛文章视频类（小红书，b站，知乎等）
@@ -35,21 +35,13 @@
 - 搜索并播放
 
 ### 模型部署
-下载好 `decider`、`grounder` 和 `planner`(QWen3 4B) 三个模型后，使用 vLLM 部署模型推理服务：
+下载好 `decider`、`grounder` 和 `planner` 三个模型后，使用 vLLM 部署模型推理服务：
 
 **默认端口部署**
 ```bash
-vllm serve decider/ --port 8000
-vllm serve grounder/ --port 8001
-vllm serve planner/ --port 8002
-```
-
-**自定义端口部署**
-```bash
-# 示例：使用自定义端口
-vllm serve decider/ --port 9000
-vllm serve grounder/ --port 9001
-vllm serve planner/ --port 9002
+vllm serve IPADS-SAI/MobiMind-Decider-7B --port <decider port>
+vllm serve IPADS-SAI/MobiMind-Grounder-3B --port <grounder port>
+vllm serve Qwen/Qwen3-4B-Instruct --port <planner port>
 ```
 
 **注意事项**
@@ -57,34 +49,26 @@ vllm serve planner/ --port 9002
 - 如果使用非默认端口，需要在启动 Agent 时通过 `--decider_port`、`--grounder_port`、`--planner_port` 参数指定对应端口
 
 ### 设置任务
-在 `runner/mobimind-agent/task.json` 中写入要测试的任务列表
+在 `runner/mobiagent/task.json` 中写入要测试的任务列表
 
 ### 项目启动
 
 **基本启动**（使用默认配置）
 ```bash
-python -m runner.mobimind-agent.mobimind_agent
+python -m runner.mobiagent.mobiagent
 ```
 
 **自定义配置启动**
 ```bash
-python -m runner.mobimind-agent.mobimind_agent --base_url <服务基础URL> --decider_port <决策服务端口> --grounder_port <定位服务端口> --planner_port <规划服务端口>
+python -m runner.mobiagent.mobiagent --service_ip <服务IP> --decider_port <决策服务端口> --grounder_port <定位服务端口> --planner_port <规划服务端口>
 ```
 
 **参数说明**
-- `--base_url`：服务基础URL（默认：`http://localhost`）
+- `--service_ip`：服务IP（默认：`localhost`）
 - `--decider_port`：决策服务端口（默认：`8000`）
-- `--grounder_port`：定位服务端口（默认：`8001`）  
+- `--grounder_port`：定位服务端口（默认：`8001`）
 - `--planner_port`：规划服务端口（默认：`8002`）
 
-**启动示例**
-```bash
-# 使用默认配置
-python -m runner.mobimind-agent.mobimind_agent
+## UI-TARS Runner
 
-# 自定义服务地址和端口
-python -m runner.mobimind-agent.mobimind_agent --base_url http://192.168.1.100 --decider_port 9000 --grounder_port 9001 --planner_port 9002
-
-# 查看帮助信息
-python -m runner.mobimind-agent.mobimind_agent --help
-```
+<!-- TODO: UI-TARS Runner REAME here -->

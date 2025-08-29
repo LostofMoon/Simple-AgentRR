@@ -65,8 +65,7 @@ def save_screenshot():
     action_count = len(action_history)
 
     # 创建数据目录
-    current_dir = os.getcwd()
-    session_base_dir = os.path.join(current_dir, 'collect', 'manual')
+    session_base_dir = os.path.dirname(__file__)
     data_base_dir = os.path.join(session_base_dir, 'data')
     app_dir = os.path.join(data_base_dir, current_app_name)
     task_type_dir = os.path.join(app_dir, current_task_type)
@@ -87,27 +86,6 @@ def get_current_hierarchy_and_screenshot(sleep_time = 0):
 
     device.screenshot(screenshot_path)
     print(f"操作完成，已重新截图和获取层次结构。总操作数: {len(action_history)}")
-
-    # # 临时为wait光速截图工具
-    # current_dir = os.getcwd()
-    # temp = "temp"
-    # temp_dir = os.path.join(current_dir, temp)
-    
-    # # 确保temp目录存在
-    # if not os.path.exists(temp_dir):
-    #     os.makedirs(temp_dir)
-    
-    # # 查找temp目录中已有的最大数字
-    # existing_files = [f for f in os.listdir(temp_dir) if f.endswith('.jpg') and f[:-4].isdigit()]
-    # if existing_files:
-    #     max_index = max(int(f[:-4]) for f in existing_files)
-    #     next_index = max_index + 1
-    # else:
-    #     next_index = 1
-    
-    # # 用新的文件名复制截图
-    # new_screenshot_name = f"{next_index}.jpg"
-    # shutil.copy2(os.path.join(current_dir, screenshot_path), os.path.join(temp_dir, new_screenshot_name))
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
@@ -268,8 +246,7 @@ async def save_current_data():
         action_history.append(action_record)
         action_count = len(action_history)
 
-        current_dir = os.getcwd()
-        app_dir = os.path.join(current_dir, 'collect', 'manual', 'data', current_app_name)
+        app_dir = os.path.join(os.path.dirname(__file__), 'data', current_app_name)
         task_type_dir = os.path.join(app_dir, current_task_type)
         data_dir = os.path.join(task_type_dir, str(currentDataIndex))
         json_file_path = os.path.join(data_dir, 'actions.json')
@@ -308,8 +285,7 @@ async def delete_current_data():
     global currentDataIndex
 
     try:
-        current_dir = os.getcwd()
-        app_dir = os.path.join(current_dir, 'collect', 'manual', 'data', current_app_name)
+        app_dir = os.path.join(os.path.dirname(__file__), 'data', current_app_name)
         task_type_dir = os.path.join(app_dir, current_task_type)
         data_dir = os.path.join(task_type_dir, str(currentDataIndex))
 
@@ -374,8 +350,7 @@ async def set_task_description(task: TaskDescription):
         current_task_description = task.description
 
         # 创建新的目录结构：data/<应用名称>/<任务类型>/<数据索引>/
-        current_dir = os.getcwd()
-        session_base_dir = os.path.join(current_dir, 'collect', 'manual')
+        session_base_dir = os.path.dirname(__file__)
         if not os.path.exists(session_base_dir):
             os.makedirs(session_base_dir)
 
