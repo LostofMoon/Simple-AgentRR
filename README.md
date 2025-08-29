@@ -1,5 +1,29 @@
 # Simple-AgentRR: 移动设备AI智能体数据收集与训练平台
 
+<div align="center">
+<p align="center">
+  <img src="assets/logo.png"/>
+</p>
+</div>
+
+## 📢News
+- `[2025.8.29]`🔥🔥 We've open-sourced the AndroidWorld benchmark code for GUI-Owl and Mobile-Agent-v3.
+
+## 📊Results
+
+<div align="center">
+<p align="center">
+  <img src="assets/result1.png"/>
+</p>
+</div>
+
+<div align="center">
+<p align="center">
+  <img src="assets/result2.png"/>
+</p>
+</div>
+
+
 ## 环境配置
 ```bash
 conda create -n MobiMind python=3.10
