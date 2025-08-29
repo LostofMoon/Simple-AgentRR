@@ -12,7 +12,7 @@ vllm serve Qwen/Qwen3-4B-Instruct --port <planner port>
 
 ```bash
 python -m mobiagent_server.server \
-    --service-ip <vllm service IP> \
+    --service_ip <vllm service IP> \
     --port <server port> \
     --decider_port <vllm decider service port> \
     --grounder_port <vllm grounder service port> \
