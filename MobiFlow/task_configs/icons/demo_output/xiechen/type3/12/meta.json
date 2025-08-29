@@ -1,0 +1,108 @@
+{
+  "image": "/Users/zhaoxi/Documents/ipads/LlmAgent/auto_collect/data/xiechen/type3/1/12.jpg",
+  "count": 5,
+  "items": [
+    {
+      "index": 0,
+      "bounds": [
+        230,
+        2247,
+        338,
+        2306
+      ],
+      "bounds_orig": [
+        20,
+        2203,
+        538,
+        2357
+      ],
+      "file": "icon_000_清空.jpg",
+      "label": "清空",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 1,
+      "bounds": [
+        545,
+        2206,
+        1050,
+        2348
+      ],
+      "bounds_orig": [
+        541,
+        2203,
+        1062,
+        2364
+      ],
+      "file": "icon_001_确定.jpg",
+      "label": "确定",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 2,
+      "bounds": [
+        967,
+        103,
+        1033,
+        162
+      ],
+      "bounds_orig": [
+        933,
+        89,
+        1063,
+        229
+      ],
+      "file": "icon_002_分享.jpg",
+      "label": "分享",
+      "aliases": [
+        "分享"
+      ],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 3,
+      "bounds": [
+        974,
+        254,
+        1035,
+        325
+      ],
+      "bounds_orig": [
+        936,
+        241,
+        1065,
+        379
+      ],
+      "file": "icon_003_日历.jpg",
+      "label": "日历",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 4,
+      "bounds": [
+        862,
+        103,
+        922,
+        162
+      ],
+      "bounds_orig": [
+        828,
+        92,
+        949,
+        229
+      ],
+      "file": "icon_004_抢票.jpg",
+      "label": "抢票",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    }
+  ]
+}

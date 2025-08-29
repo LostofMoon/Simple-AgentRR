@@ -1,0 +1,106 @@
+{
+  "image": "/Users/zhaoxi/Documents/ipads/LlmAgent/auto_collect/data/xiechen/type3/1/10.jpg",
+  "count": 5,
+  "items": [
+    {
+      "index": 0,
+      "bounds": [
+        108,
+        2230,
+        162,
+        2289
+      ],
+      "bounds_orig": [
+        18,
+        2192,
+        293,
+        2405
+      ],
+      "file": "icon_000_高级筛选.jpg",
+      "label": "高级筛选",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 1,
+      "bounds": [
+        206,
+        222,
+        418,
+        386
+      ],
+      "bounds_orig": [
+        202,
+        217,
+        427,
+        393
+      ],
+      "file": "icon_001_日期选择.jpg",
+      "label": "日期选择",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 2,
+      "bounds": [
+        475,
+        425,
+        524,
+        478
+      ],
+      "bounds_orig": [
+        366,
+        377,
+        733,
+        537
+      ],
+      "file": "icon_002_汽车票.jpg",
+      "label": "汽车票",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 3,
+      "bounds": [
+        375,
+        2224,
+        434,
+        2287
+      ],
+      "bounds_orig": [
+        273,
+        2192,
+        551,
+        2364
+      ],
+      "file": "icon_003_出发最早.jpg",
+      "label": "出发最早",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 4,
+      "bounds": [
+        917,
+        2222,
+        976,
+        2290
+      ],
+      "bounds_orig": [
+        802,
+        2192,
+        1066,
+        2411
+      ],
+      "file": "icon_004_价格最低.jpg",
+      "label": "价格最低",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    }
+  ]
+}

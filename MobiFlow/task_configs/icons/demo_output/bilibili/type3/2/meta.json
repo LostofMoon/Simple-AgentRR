@@ -1,0 +1,86 @@
+{
+  "image": "/Users/zhaoxi/Documents/ipads/LlmAgent/auto_collect/data/bilibili/type3/1/2.jpg",
+  "count": 4,
+  "items": [
+    {
+      "index": 0,
+      "bounds": [
+        894,
+        2670,
+        946,
+        2722
+      ],
+      "bounds_orig": [
+        736,
+        2613,
+        1239,
+        2771
+      ],
+      "file": "icon_000_返回.jpg",
+      "label": "返回",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 1,
+      "bounds": [
+        302,
+        2686,
+        354,
+        2706
+      ],
+      "bounds_orig": [
+        0,
+        2613,
+        545,
+        2771
+      ],
+      "file": "icon_001_菜单.jpg",
+      "label": "菜单",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 2,
+      "bounds": [
+        598,
+        2670,
+        650,
+        2722
+      ],
+      "bounds_orig": [
+        469,
+        2614,
+        789,
+        2771
+      ],
+      "file": "icon_002_主页.jpg",
+      "label": "主页",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 3,
+      "bounds": [
+        900,
+        2389,
+        1195,
+        2542
+      ],
+      "bounds_orig": [
+        897,
+        2384,
+        1195,
+        2542
+      ],
+      "file": "icon_003_跳过.jpg",
+      "label": "跳过",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    }
+  ]
+}

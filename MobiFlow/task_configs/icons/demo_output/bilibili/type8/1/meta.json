@@ -1,0 +1,110 @@
+{
+  "image": "/Users/zhaoxi/Documents/ipads/LlmAgent/auto_collect/data/bilibili/type8/1/1.jpg",
+  "count": 5,
+  "items": [
+    {
+      "index": 0,
+      "bounds": [
+        250,
+        2237,
+        291,
+        2273
+      ],
+      "bounds_orig": [
+        212,
+        2227,
+        506,
+        2375
+      ],
+      "file": "icon_000_动态.jpg",
+      "label": "动态",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 1,
+      "bounds": [
+        658,
+        2227,
+        934,
+        2315
+      ],
+      "bounds_orig": [
+        658,
+        2224,
+        934,
+        2375
+      ],
+      "file": "icon_001_会员购.jpg",
+      "label": "会员购",
+      "aliases": [
+        "会员"
+      ],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 2,
+      "bounds": [
+        944,
+        2236,
+        986,
+        2274
+      ],
+      "bounds_orig": [
+        904,
+        2224,
+        1151,
+        2375
+      ],
+      "file": "icon_002_我的.jpg",
+      "label": "我的",
+      "aliases": [
+        "我的"
+      ],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 3,
+      "bounds": [
+        245,
+        181,
+        291,
+        226
+      ],
+      "bounds_orig": [
+        199,
+        144,
+        854,
+        267
+      ],
+      "file": "icon_003_搜索.jpg",
+      "label": "搜索",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 4,
+      "bounds": [
+        510,
+        2238,
+        640,
+        2370
+      ],
+      "bounds_orig": [
+        499,
+        2235,
+        648,
+        2375
+      ],
+      "file": "icon_004_发布.jpg",
+      "label": "发布",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    }
+  ]
+}

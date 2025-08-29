@@ -1,0 +1,46 @@
+{
+  "image": "/Users/zhaoxi/Documents/ipads/LlmAgent/auto_collect/data/xiechen/type3/1/7.jpg",
+  "count": 2,
+  "items": [
+    {
+      "index": 0,
+      "bounds": [
+        7,
+        830,
+        173,
+        1026
+      ],
+      "bounds_orig": [
+        0,
+        825,
+        187,
+        1036
+      ],
+      "file": "icon_000_已选日期.jpg",
+      "label": "已选日期",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 1,
+      "bounds": [
+        502,
+        2054,
+        578,
+        2130
+      ],
+      "bounds_orig": [
+        449,
+        1966,
+        627,
+        2173
+      ],
+      "file": "icon_001_可选日期.jpg",
+      "label": "可选日期",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    }
+  ]
+}

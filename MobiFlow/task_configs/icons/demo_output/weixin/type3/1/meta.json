@@ -1,0 +1,106 @@
+{
+  "image": "/Users/zhaoxi/Documents/ipads/LlmAgent/auto_collect/data/weixin/type3/1/1.jpg",
+  "count": 5,
+  "items": [
+    {
+      "index": 0,
+      "bounds": [
+        973,
+        2239,
+        1042,
+        2304
+      ],
+      "bounds_orig": [
+        777,
+        2214,
+        1140,
+        2375
+      ],
+      "file": "icon_000_我.jpg",
+      "label": "我",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 1,
+      "bounds": [
+        390,
+        2238,
+        474,
+        2306
+      ],
+      "bounds_orig": [
+        360,
+        2216,
+        496,
+        2375
+      ],
+      "file": "icon_001_通讯录.jpg",
+      "label": "通讯录",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 2,
+      "bounds": [
+        95,
+        2237,
+        185,
+        2306
+      ],
+      "bounds_orig": [
+        75,
+        2213,
+        210,
+        2375
+      ],
+      "file": "icon_002_微信.jpg",
+      "label": "微信",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 3,
+      "bounds": [
+        679,
+        2231,
+        757,
+        2309
+      ],
+      "bounds_orig": [
+        665,
+        2220,
+        771,
+        2375
+      ],
+      "file": "icon_003_发现.jpg",
+      "label": "发现",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 4,
+      "bounds": [
+        1038,
+        155,
+        1106,
+        225
+      ],
+      "bounds_orig": [
+        1014,
+        129,
+        1125,
+        253
+      ],
+      "file": "icon_004_添加.jpg",
+      "label": "添加",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    }
+  ]
+}
