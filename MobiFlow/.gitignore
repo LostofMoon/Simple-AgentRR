@@ -1,0 +1,4 @@
+dist/
+build/
+*/__pycache__/
+avdag.egg-info/

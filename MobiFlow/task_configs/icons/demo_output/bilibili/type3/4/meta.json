@@ -1,0 +1,48 @@
+{
+  "image": "/Users/zhaoxi/Documents/ipads/LlmAgent/auto_collect/data/bilibili/type3/1/4.jpg",
+  "count": 2,
+  "items": [
+    {
+      "index": 0,
+      "bounds": [
+        1030,
+        2444,
+        1200,
+        2599
+      ],
+      "bounds_orig": [
+        1020,
+        2436,
+        1209,
+        2609
+      ],
+      "file": "icon_000_搜索.jpg",
+      "label": "搜索",
+      "aliases": [
+        "搜索"
+      ],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 1,
+      "bounds": [
+        479,
+        2444,
+        760,
+        2599
+      ],
+      "bounds_orig": [
+        468,
+        2436,
+        767,
+        2611
+      ],
+      "file": "icon_001_语音输入.jpg",
+      "label": "语音输入",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    }
+  ]
+}

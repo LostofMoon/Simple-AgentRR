@@ -1,0 +1,26 @@
+{
+  "image": "/Users/zhaoxi/Documents/ipads/LlmAgent/auto_collect/data/bilibili/type8/1/8.jpg",
+  "count": 1,
+  "items": [
+    {
+      "index": 0,
+      "bounds": [
+        1014,
+        789,
+        1090,
+        859
+      ],
+      "bounds_orig": [
+        702,
+        768,
+        1136,
+        881
+      ],
+      "file": "icon_000_发弹幕.jpg",
+      "label": "发弹幕",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    }
+  ]
+}

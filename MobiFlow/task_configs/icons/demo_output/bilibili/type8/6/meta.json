@@ -1,0 +1,66 @@
+{
+  "image": "/Users/zhaoxi/Documents/ipads/LlmAgent/auto_collect/data/bilibili/type8/1/6.jpg",
+  "count": 3,
+  "items": [
+    {
+      "index": 0,
+      "bounds": [
+        1016,
+        789,
+        1091,
+        859
+      ],
+      "bounds_orig": [
+        701,
+        770,
+        1151,
+        884
+      ],
+      "file": "icon_000_发弹幕.jpg",
+      "label": "发弹幕",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 1,
+      "bounds": [
+        1046,
+        2278,
+        1115,
+        2346
+      ],
+      "bounds_orig": [
+        1031,
+        2242,
+        1122,
+        2375
+      ],
+      "file": "icon_001_表情.jpg",
+      "label": "表情",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 2,
+      "bounds": [
+        834,
+        2301,
+        864,
+        2322
+      ],
+      "bounds_orig": [
+        63,
+        2281,
+        864,
+        2341
+      ],
+      "file": "icon_002_评论.jpg",
+      "label": "评论",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "image": "/Users/zhaoxi/Documents/ipads/LlmAgent/auto_collect/data/bilibili/type3/1/6.jpg",
+  "count": 5,
+  "items": [
+    {
+      "index": 0,
+      "bounds": [
+        1070,
+        158,
+        1186,
+        234
+      ],
+      "bounds_orig": [
+        1039,
+        128,
+        1208,
+        273
+      ],
+      "file": "icon_000_搜索.jpg",
+      "label": "搜索",
+      "aliases": [
+        "搜索"
+      ],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 1,
+      "bounds": [
+        298,
+        176,
+        337,
+        224
+      ],
+      "bounds_orig": [
+        159,
+        154,
+        458,
+        246
+      ],
+      "file": "icon_001_搜索框.jpg",
+      "label": "搜索框",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 2,
+      "bounds": [
+        908,
+        166,
+        970,
+        226
+      ],
+      "bounds_orig": [
+        887,
+        143,
+        989,
+        250
+      ],
+      "file": "icon_002_AI搜索.jpg",
+      "label": "AI搜索",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 3,
+      "bounds": [
+        768,
+        171,
+        825,
+        224
+      ],
+      "bounds_orig": [
+        754,
+        154,
+        836,
+        253
+      ],
+      "file": "icon_003_清除.jpg",
+      "label": "清除",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 4,
+      "bounds": [
+        55,
+        166,
+        98,
+        226
+      ],
+      "bounds_orig": [
+        31,
+        156,
+        118,
+        242
+      ],
+      "file": "icon_004_返回.jpg",
+      "label": "返回",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    }
+  ]
+}
