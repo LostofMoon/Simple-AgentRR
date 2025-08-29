@@ -66,7 +66,7 @@ def save_screenshot():
 
     # 创建数据目录
     current_dir = os.getcwd()
-    session_base_dir = os.path.join(current_dir, 'collect', 'manual_collection')
+    session_base_dir = os.path.join(current_dir, 'collect', 'manual')
     data_base_dir = os.path.join(session_base_dir, 'data')
     app_dir = os.path.join(data_base_dir, current_app_name)
     task_type_dir = os.path.join(app_dir, current_task_type)
@@ -269,7 +269,7 @@ async def save_current_data():
         action_count = len(action_history)
 
         current_dir = os.getcwd()
-        app_dir = os.path.join(current_dir, 'collect', 'manual_collection', 'data', current_app_name)
+        app_dir = os.path.join(current_dir, 'collect', 'manual', 'data', current_app_name)
         task_type_dir = os.path.join(app_dir, current_task_type)
         data_dir = os.path.join(task_type_dir, str(currentDataIndex))
         json_file_path = os.path.join(data_dir, 'actions.json')
@@ -309,7 +309,7 @@ async def delete_current_data():
 
     try:
         current_dir = os.getcwd()
-        app_dir = os.path.join(current_dir, 'collect', 'manual_collection', 'data', current_app_name)
+        app_dir = os.path.join(current_dir, 'collect', 'manual', 'data', current_app_name)
         task_type_dir = os.path.join(app_dir, current_task_type)
         data_dir = os.path.join(task_type_dir, str(currentDataIndex))
 
@@ -375,7 +375,7 @@ async def set_task_description(task: TaskDescription):
 
         # 创建新的目录结构：data/<应用名称>/<任务类型>/<数据索引>/
         current_dir = os.getcwd()
-        session_base_dir = os.path.join(current_dir, 'collect', 'manual_collection')
+        session_base_dir = os.path.join(current_dir, 'collect', 'manual')
         if not os.path.exists(session_base_dir):
             os.makedirs(session_base_dir)
 

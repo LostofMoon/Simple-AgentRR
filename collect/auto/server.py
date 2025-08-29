@@ -14,7 +14,7 @@ from datetime import datetime
 from openai import OpenAI
 import argparse
 
-from collect.auto_collection.utils.draw_bounds import process_folder
+from collect.auto.utils.draw_bounds import process_folder
 
 device = None  # 设备连接对象
 hierarchy = None  # 层次结构数据
@@ -421,7 +421,7 @@ def change_auto_data(data_log_path, index):
     }
 
     current_dir = os.getcwd()
-    dest_path_dir = os.path.join(current_dir, 'collect', 'auto_collection', 'data')
+    dest_path_dir = os.path.join(current_dir, 'collect', 'auto', 'data')
     if not os.path.exists(dest_path_dir):
         os.makedirs(dest_path_dir)
     existing_dirs = [d for d in os.listdir(dest_path_dir) if os.path.isdir(os.path.join(dest_path_dir, d)) and d.isdigit()]
@@ -467,13 +467,13 @@ if __name__ == "__main__":
     device = u2.connect()
     # 创建数据目录
     current_dir = os.getcwd()
-    session_base_dir = os.path.join(current_dir, 'collect', 'auto_collection')
+    session_base_dir = os.path.join(current_dir, 'collect', 'auto')
     data_base_dir = os.path.join(session_base_dir, 'data_log')
     if not os.path.exists(data_base_dir):
         os.makedirs(data_base_dir)
 
     # 读取任务列表
-    task_json_path = os.path.join(current_dir, "collect", "auto_collection", "task.json")
+    task_json_path = os.path.join(current_dir, "collect", "auto", "task.json")
     with open(task_json_path, "r", encoding="utf-8") as f:
         task_list = json.load(f)
 
