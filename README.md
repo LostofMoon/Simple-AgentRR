@@ -51,3 +51,47 @@ python -m pip install paddlepaddle-gpu==3.1.0 -i https://www.paddlepaddle.org.cn
 
 ## 子模块使用方式
 详细使用方式见各子模块目录下的 `README.md` 文件
+
+## 快速启动
+
+### APP下载
+[下载连接](https://www.baidu.com)
+
+<!-- TODO: 怎么使用 -->
+
+### ADB调用
+
+#### 模型部署
+下载好 `decider`、`grounder` 和 `planner` 三个模型后，使用 vLLM 部署模型推理服务：
+
+**默认端口部署**
+```bash
+vllm serve IPADS-SAI/MobiMind-Decider-7B --port <decider port>
+vllm serve IPADS-SAI/MobiMind-Grounder-3B --port <grounder port>
+vllm serve Qwen/Qwen3-4B-Instruct --port <planner port>
+```
+
+**注意事项**
+- 确保部署的服务端口与后续启动 MobiMind-Agent 时指定的端口参数一致
+- 如果使用非默认端口，需要在启动 Agent 时通过 `--decider_port`、`--grounder_port`、`--planner_port` 参数指定对应端口
+
+#### 设置任务
+在 `runner/mobiagent/task.json` 中写入要测试的任务列表
+
+#### 项目启动
+
+**基本启动**（使用默认配置）
+```bash
+python -m runner.mobiagent.mobiagent
+```
+
+**自定义配置启动**
+```bash
+python -m runner.mobiagent.mobiagent --service_ip <服务IP> --decider_port <决策服务端口> --grounder_port <定位服务端口> --planner_port <规划服务端口>
+```
+
+**参数说明**
+- `--service_ip`：服务IP（默认：`localhost`）
+- `--decider_port`：决策服务端口（默认：`8000`）
+- `--grounder_port`：定位服务端口（默认：`8001`）
+- `--planner_port`：规划服务端口（默认：`8002`）
