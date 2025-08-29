@@ -42,7 +42,7 @@
   - `weixin/` 微信应用图标模板
   - `bilibili/` B站应用图标模板
   - `xiecheng/` 携程应用图标模板
-- `task_configs/` 任务配置与图标资源（仓库中的可用示例配置位于此目录）
+- `task_configs/` 任务配置与图标资源（本目录中的可用示例配置位于此目录）
   - `task_configs/*.json` JSON 格式的任务配置示例
   - `task_configs/icons/` 图标资源模板
 - `docs/` 使用说明与设计文档（包含多路径、检查器模式与OCR/LLM 使用说明）
@@ -57,6 +57,8 @@
 
 ## 安装依赖
 
+安装项目根目录的相关库即可
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -69,7 +71,7 @@ pip install opencv-python numpy
 
 ## 快速开始
 
-1) 查看仓库内的示例配置：`task_configs/` 中包含若干任务配置及图标资源。
+1) 查看本目录内的示例配置：`task_configs/` 中包含若干任务配置及图标资源。
 
 2) 使用最小演示脚本运行（示例使用 `task_configs` 中的配置）：
 

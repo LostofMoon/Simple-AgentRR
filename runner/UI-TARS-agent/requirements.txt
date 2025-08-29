@@ -1,7 +1,0 @@
-# UI-TARS 自动化框架依赖
-openai>=1.0.0
-uiautomator2>=3.0.0
-pillow>=9.0.0
-matplotlib>=3.5.0
-requests>=2.25.0
-ui-tars

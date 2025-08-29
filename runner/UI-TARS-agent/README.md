@@ -11,6 +11,9 @@
 ## 快速开始
 
 ### 1. 安装依赖
+
+安装项目根目录下的相关依赖即可
+
 ```bash
 pip install -r requirements.txt
 ```

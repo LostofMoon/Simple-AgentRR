@@ -6,6 +6,7 @@ torchaudio
 # PaddlePaddle and OCR
 paddlepaddle
 paddleocr==2.10.0
+pytesseract
 
 # Computer Vision and ML
 ultralytics
@@ -32,3 +33,7 @@ uiautomator2
 fastapi
 uvicorn
 
+# UI
+matplotlib
+requests
+ui-tars
