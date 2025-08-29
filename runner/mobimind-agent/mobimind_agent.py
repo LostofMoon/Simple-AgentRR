@@ -14,9 +14,7 @@ import textwrap
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-msg_list = []
 MAX_STEPS = 30
-stop_flag = False  # 给前端用的
 
 class Device(ABC):
     @abstractmethod
@@ -169,29 +167,6 @@ app_scale = {
     "同城": 1.0,
 }
 
-def reset_msg():
-    global msg_list
-    msg_list.clear()
-
-def add_msg(msg):
-    global msg_list
-    msg_list.append(msg)
-
-def get_msg():
-    return msg_list
-
-def set_stop_flag():
-    global stop_flag
-    stop_flag = True
-
-def reset_stop_flag():
-    global stop_flag
-    stop_flag = False
-
-def is_stopped():
-    return stop_flag
-
-
 def get_screenshot(device):
     device.screenshot(screenshot_path)
     # resize the screenshot to reduce the size for processing
@@ -206,22 +181,9 @@ def task_in_app(app, old_task, task, device, data_dir, bbox_flag=True):
     history = []
     actions = []
     reacts = []
-    while True:
-        # 检查停止标志
-        if is_stopped():
-            logging.info("Task stopped by user request.")
-            add_msg({
-                "role": "system",
-                "content": f"任务已被用户停止，{app} 中的操作终止。"
-            })
-            return
-            
+    while True:     
         if len(actions) >= MAX_STEPS:
             logging.info("Reached maximum steps, stopping the task.")
-            add_msg({
-                "role": "system",
-                "content": f"{app} Reached maximum steps, stopping the task in this app."
-            })
             break
         
         if len(history) == 0:
@@ -261,22 +223,8 @@ def task_in_app(app, old_task, task, device, data_dir, bbox_flag=True):
             }
         }
         reacts.append(converted_item)
-
-        add_msg({
-            "role": "assistant",
-            "content": decider_response["reasoning"]
-        })
         action = decider_response["action"]
-        
-        # 在执行动作前再次检查停止标志
-        if is_stopped():
-            logging.info("Task stopped by user request before action execution.")
-            add_msg({
-                "role": "system",
-                "content": f"任务已被用户停止，{app} 中的操作终止。"
-            })
-            return
-        
+
         current_dir = os.getcwd()
         img_path = os.path.join(current_dir, f"screenshot.jpg")
         save_path = os.path.join(data_dir, f"{len(actions) + 1}.jpg")
@@ -316,7 +264,6 @@ def task_in_app(app, old_task, task, device, data_dir, bbox_flag=True):
             logging.info(f"Grounder response: \n{grounder_response_str}")
             grounder_response = json.loads(grounder_response_str)
             if(bbox_flag):
-
                 bbox = grounder_response["bbox"]
 
                 x1, y1, x2, y2 = [int(coord / factor) for coord in bbox]
@@ -369,7 +316,6 @@ def task_in_app(app, old_task, task, device, data_dir, bbox_flag=True):
                 #     cv2.arrowedLine(cv2image, (x1, y1), (x2, y2), (0, 0, 255), 5)
                 # success, encoded_img = cv2.imencode('.jpg', cv2image)
 
-
             else:
                 coordinates = grounder_response["coordinates"]
                 x, y = [int(coord / factor) for coord in coordinates]
@@ -414,8 +360,7 @@ def task_in_app(app, old_task, task, device, data_dir, bbox_flag=True):
             })
         else:
             raise ValueError(f"Unknown action: {action}")
-
-        # 有wait只需要1秒，但是现在没有wait
+        
         time.sleep(1)
     
     data = {
