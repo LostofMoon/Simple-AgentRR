@@ -28,17 +28,21 @@
 ```bash
 conda create -n MobiMind python=3.10
 conda activate MobiMind
-conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia -y
-python -m pip install paddlepaddle-gpu==3.1.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
-pip install paddleocr==2.10.0 ultralytics transformers==4.47.0 Pillow opencv-python numpy scipy supervision langchain-openai langchain-core
-pip install openai uiautomator2 pillow
-pip install fastapi uvicorn
 
+pip install -r requirements.txt
+
+# 下载OmniParser模型权重
 for f in icon_detect/{train_args.yaml,model.pt,model.yaml} ; do huggingface-cli download microsoft/OmniParser-v2.0 "$f" --local-dir weights; done
+
+# 如果需要使用gpu加速ocr，需要根据cuda版本，手动安装paddlepaddle-gpu
+# 详情参考 https://www.paddlepaddle.org.cn/install/quick，例如cuda 11.8版本：
+python -m pip install paddlepaddle-gpu==3.1.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
+
 ```
 
 ## 手机配置
-- 在Android设备上安装项目根目录中的 `ADBKeyboard.apk` 文件，必须开启开发者选项
+- 在Android设备上下载并安装 [ADBKeyboard](https://github.com/senzhk/ADBKeyBoard/blob/master/ADBKeyboard.apk)
+- 在Android设备上必须开启开发者选项
 - 使用USB数据线连接手机和电脑
 - 手机上会弹出USB调试授权提示，点击 **允许**
 
