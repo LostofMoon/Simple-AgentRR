@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 import time
 import re
 import os
+import argparse
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
 
@@ -101,12 +102,10 @@ class AndroidDevice(Device):
 
 decider_client = None
 grounder_client = None
-rewriter_client = None
-general_client = None
-general_model = None
+planner_client = None
 
-def init(base_url, decider_port, grounder_port, rewriter_port, general_url, general_model_name, general_api_key):
-    global decider_client, grounder_client, rewriter_client, general_client, general_model, apps
+def init(base_url, decider_port, grounder_port, planner_port):
+    global decider_client, grounder_client, planner_client, general_client, general_model, apps
     decider_client = OpenAI(
         api_key = "0",
         base_url = f"{base_url}:{decider_port}/v1",
@@ -115,15 +114,10 @@ def init(base_url, decider_port, grounder_port, rewriter_port, general_url, gene
         api_key = "0",
         base_url = f"{base_url}:{grounder_port}/v1",
     )
-    rewriter_client = OpenAI(
+    planner_client = OpenAI(
         api_key = "0",
-        base_url = f"{base_url}:{rewriter_port}/v1",
+        base_url = f"{base_url}:{planner_port}/v1",
     )
-    general_client = OpenAI(
-        api_key = general_api_key,
-        base_url= f"{general_url}/v1"
-    )
-    general_model = general_model_name
 
 decider_prompt_template = """
 You are a phone-use AI agent. Now your task is "{task}".
@@ -384,8 +378,8 @@ def get_app_package_name(task_description):
     """根据任务描述获取需要启动的app包名和改写后的任务描述"""
     app_selection_prompt = app_selection_prompt_template.format(task_description=task_description)
     while True:
-        response_str = rewriter_client.chat.completions.create(
-            model="rewriter",
+        response_str = planner_client.chat.completions.create(
+            model="planner",
             messages=[
                 {
                     "role": "user",
@@ -412,8 +406,17 @@ def get_app_package_name(task_description):
 
 # for testing purposes
 if __name__ == "__main__":
+    # 解析命令行参数
+    parser = argparse.ArgumentParser(description="MobiMind Agent")
+    parser.add_argument("--base_url", type=str, default="http://localhost", help="Base URL for the services (default: http://localhost)")
+    parser.add_argument("--decider_port", type=int, default=8000, help="Port for decider service (default: 8000)")
+    parser.add_argument("--grounder_port", type=int, default=8001, help="Port for grounder service (default: 8001)")
+    parser.add_argument("--planner_port", type=int, default=8002, help="Port for planner service (default: 8002)")
+    
+    args = parser.parse_args()
 
-    init("http://localhost", 8000, 8001, 8002, "http://ipads.chat.gpt:3006", "google/gemini-2.5-pro", "sk-rfCIGhxrzcdsMV4jC17e406bE56c47CbA5416068A62318D3")
+    # 使用命令行参数初始化
+    init(args.base_url, args.decider_port, args.grounder_port, args.planner_port)
 
     device = AndroidDevice()
     print(f"connect to device")
@@ -431,10 +434,6 @@ if __name__ == "__main__":
     # print(task_list)
 
     for task in task_list:
-
-    # while True:
-    #     task_description = input("Input Task: ")
-
         existing_dirs = [d for d in os.listdir(data_base_dir) if os.path.isdir(os.path.join(data_base_dir, d)) and d.isdigit()]
         if existing_dirs:
             data_index = max(int(d) for d in existing_dirs) + 1
@@ -442,11 +441,6 @@ if __name__ == "__main__":
             data_index = 1
         data_dir = os.path.join(data_base_dir, str(data_index))
         os.makedirs(data_dir)
-
-        # app_name = task["app_name"]
-        # package_name = task["package_name"]
-        # task_description = task["old_task_description"]
-        # new_task_description = task["new_task_description"]
 
         task_description = task
         app_name, package_name, new_task_description = get_app_package_name(task_description)

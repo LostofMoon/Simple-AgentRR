@@ -308,20 +308,59 @@ python -m construct_data.sft --data_path <原始数据路径> --ss_data_path <�
 - 搜索歌曲，歌手，乐队
 - 搜索并播放
 
-#### download vLLM
-下载好 `decider` 和 `grounder` 两个模型后，使用vLLM部署模型推理，版本为 `0.9.1`，`transformers` 版本为 `4.51.3`:
+#### 模型部署
+下载好 `decider`、`grounder` 和 `planner`(QWen3 4B) 三个模型后，使用 vLLM 部署模型推理服务：
+
+**默认端口部署**
 ```bash
 vllm serve decider/ --port 8000
 vllm serve grounder/ --port 8001
 vllm serve planner/ --port 8002
 ```
 
+**自定义端口部署**
+```bash
+# 示例：使用自定义端口
+vllm serve decider/ --port 9000
+vllm serve grounder/ --port 9001
+vllm serve planner/ --port 9002
+```
+
+**注意事项**
+- 确保部署的服务端口与后续启动 MobiMind-Agent 时指定的端口参数一致
+- 如果使用非默认端口，需要在启动 Agent 时通过 `--decider_port`、`--grounder_port`、`--planner_port` 参数指定对应端口
+
 #### 设置任务
-在/runner/mobimind—agent/task.json中写入要测试的列表
+在 `runner/mobimind-agent/task.json` 中写入要测试的任务列表
 
 #### 项目启动
+
+**基本启动**（使用默认配置）
 ```bash
-python -m simple_agentRR.simple_agentRR
+python -m runner.mobimind-agent.mobimind_agent
+```
+
+**自定义配置启动**
+```bash
+python -m runner.mobimind-agent.mobimind_agent --base_url <服务基础URL> --decider_port <决策服务端口> --grounder_port <定位服务端口> --planner_port <规划服务端口>
+```
+
+**参数说明**
+- `--base_url`：服务基础URL（默认：`http://localhost`）
+- `--decider_port`：决策服务端口（默认：`8000`）
+- `--grounder_port`：定位服务端口（默认：`8001`）  
+- `--planner_port`：规划服务端口（默认：`8002`）
+
+**启动示例**
+```bash
+# 使用默认配置
+python -m runner.mobimind-agent.mobimind_agent
+
+# 自定义服务地址和端口
+python -m runner.mobimind-agent.mobimind_agent --base_url http://192.168.1.100 --decider_port 9000 --grounder_port 9001 --planner_port 9002
+
+# 查看帮助信息
+python -m runner.mobimind-agent.mobimind_agent --help
 ```
 
 ## 项目结构
