@@ -2,8 +2,8 @@
 
 ## 环境配置
 ```bash
-conda create -n agentRR python=3.10
-conda activate agentRR
+conda create -n MobiMind python=3.10
+conda activate MobiMind
 conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia -y
 python -m pip install paddlepaddle-gpu==3.1.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
 pip install paddleocr==2.10.0 ultralytics transformers==4.47.0 Pillow opencv-python numpy scipy supervision langchain-openai langchain-core
@@ -238,71 +238,88 @@ python -m annotation.auto_annotate --data_path <数据路径> --model <模型名
 4. 生成包含推理过程的 `react.json` 文件
 5. 保存完整的标注数据集，用于后续模型训练
 
-**输出数据**
-- 带有视觉标注的截图序列
-- 包含推理过程的 `react.json` 文件
-- 原始的 `actions.json` 文件（保持不变）
-
 **数据存储格式**
 
-收集的数据自动保存到对应目录，按以下层级结构组织：
-
+收集的数据自动保存到对应目录，最小的子目录有如下结构：
 ```
-data/
-├── <应用名称>/
-│   ├── <任务类型>/
-│   │   ├── 1/
-│   │   │   ├── 1.jpg          # 第1个操作前的截图
-│   │   │   ├── 2.jpg          # 第2个操作前的截图
-│   │   │   ├── ...
-│   │   │   └── actions.json   # 操作记录和任务信息
-│   │   │   └── react.json     # 标注数据
-│   │   ├── 2/
-│   │   │   └── ...            # 第2条数据
-│   │   └── ...
-│   └── <其他任务类型>/
-└── <其他应用名称>/
+dir/
+├── 1.jpg          # 第1个操作前的截图
+├── 2.jpg          # 第2个操作前的截图
+├── ...
+└── actions.json   # 操作记录和任务信息
+└── react.json     # 标注数据
 ```
-
 
 ### 数据构建
+
+数据构建模块将标注后的数据转换为适合模型训练的格式，支持监督微调（SFT）数据集的生成。
+
+#### 启动命令
+
 ```bash
-python -m construct_data.sft
+python -m construct_data.sft --data_path <原始数据路径> --ss_data_path <单步数据路径> --unexpected_img_path <意外图片路径> --out_path <输出路径> [--factor <缩放因子>] [--train_ratio <训练比例>]
 ```
-#### 训练集生成
 
-1. decider模型
-entry粒度为每一个action
-@dataclass
-class AlpacaImageEntry:
-    instruction: str
-    output: str
-    images: List[str]
-    input: str = ""
-    
-- in：actions' history, task description, current img
-- out：react.json中一条对应的实例，如下
-{
-    "reasoning": "选择这个function type（action type）的原因",
-    "function": {
-        "name": "click, input, swipe, done, wait",
-        "parameters": {
-            "target_element": "click的highlevel描述",
-            "direction": "UP, DOWN, LEFT, RIGHT",
-                "text": "input的内容"
-        }
-    }
-}
+#### 参数说明
 
-2. grounder模型
-type1:
-in：target element's description 和 reasoning
-out：bounds box [x1, x2, y1, y2]
-type2:
-- in：target element's description 和 reasoning
-- out：coordinates [x, y]
+**必需参数**
+- `--data_path`：原始轨迹数据存储路径（默认：`data`）
+- `--ss_data_path`：单步数据存储路径（默认：`ss_data`）
+- `--unexpected_img_path`：意外图片数据路径（默认：`unexpected_img`）
+- `--out_path`：训练数据集输出路径（默认：`output`）
 
-### Simple-AgentRR 智能体执行器
+**可选参数**
+- `--factor`：图片缩放因子，用于减小图片尺寸（默认：`0.5`）
+- `--train_ratio`：训练集与验证集的划分比例（默认：`0.9`）
+
+### Runner
+
+#### MobiMind-Agent
+
+**支持功能**
+1. 论坛文章视频类（小红书，b站，知乎等）
+- 关注xx，进入主页
+- 搜索，打开，播放
+- 在用户主页搜索，打开，播放
+- 点赞，收藏，评论，转发
+
+2. 社交软件类（微信QQ等）
+- 发消息，打电话，打视频，查找聊天内容
+- @某人+发消息
+- 打开小程序，打开朋友圈（打开朋友圈评论我们这个框架肯定可以）
+
+3. 购物类（淘宝，京东等）
+- 搜索，按照价格销量等排序搜索，打开搜索结果
+- 加入购物车和下单，选择对应规格加入购物车和下单
+- 关注店铺
+
+4. 外卖类（饿了么，美团）
+- 点外卖，包括选择规格和数量
+
+5. 旅游类（飞猪，去哪儿，携程，同城，华住会）
+- 查询酒店价格（地点，地标附近，指定酒店，日期）
+- 预定酒店（地点，地标附近，指定酒店，日期，房间类型）
+- 购买火车票飞机票（和设定始发地和目的地，以及日期时间段）
+
+6. 地图类（高德）
+- 导航，打车（始发地，目的地可以更改）
+
+7. 听歌类（网易云，QQ音乐）
+- 搜索歌曲，歌手，乐队
+- 搜索并播放
+
+#### download vLLM
+下载好 `decider` 和 `grounder` 两个模型后，使用vLLM部署模型推理，版本为 `0.9.1`，`transformers` 版本为 `4.51.3`:
+```bash
+vllm serve decider/ --port 8000
+vllm serve grounder/ --port 8001
+vllm serve planner/ --port 8002
+```
+
+#### 设置任务
+在/runner/mobimind—agent/task.json中写入要测试的列表
+
+#### 项目启动
 ```bash
 python -m simple_agentRR.simple_agentRR
 ```
@@ -317,49 +334,3 @@ python -m simple_agentRR.simple_agentRR
 - `prompts/` - 提示词模板
 - `utils/` - 工具函数库
 - `weights/` - 模型权重文件
-
-## 详细文档
-
-每个子模块都有独立的README文档，详细说明使用方法和配置选项。请参考对应目录下的README.md文件。
-
-## 数据流
-![alt text](dataflow.png)
-
-### 定义动作空间
-1. **CLICK [x,y]**: The user clicked on the screen at the position [x,y]. The origin [0,0] is at the top-left corner of the screen, x is the horizontal coordinate, and y is the vertical coordinate. Both x and y are relative coordinates, ranging from 0 to 1000. For example, [500,500] is the center of the screen, and [1000,1000] is the bottom-right corner of the screen.
-2. **INPUT `<text>`**: The user typed the text `<text>` using the keyboard. The text can contain characters in any language. The action only happens when the user has already clicked on a search bar or a text input field, and the keyboard is activated.
-3. **SWIPE [x1,y1] to [x2,y2]**: The user swiped from the position [x1,y1] to the position [x2,y2]. The meaning of x1, y1, x2, and y2 is the same as in the CLICK action.
-4. **DONE**: The user has successfully completed the assigned task. This action indicates that all required objectives have been accomplished and no further interaction is needed.
-5. **wait***: Wait to ad, load and redirect
-
-## 支持功能
-- 论坛文章视频类（小红书，b站，知乎等）
-1. 关注xx，进入主页
-2. 搜索，打开，播放
-3. 在用户主页搜索，打开，播放
-3. 点赞，收藏，评论，转发
-
-- 社交软件类（微信QQ等）
-1. 发消息，打电话，打视频，查找聊天内容
-2. @某人+发消息
-3. 打开小程序，打开朋友圈（打开朋友圈评论我们这个框架肯定可以）
-
-- 购物类（淘宝，京东等）
-1. 搜索，按照价格销量等排序搜索，打开搜索结果
-2. 加入购物车和下单，选择对应规格加入购物车和下单
-3. 关注店铺
-
-- 外卖类（饿了么，美团）
-1. 点外卖，包括选择规格和数量
-
-- 旅游类（飞猪，去哪儿，携程，同城，华住会）
-1. 查询酒店价格（地点，地标附近，指定酒店，日期）
-2. 预定酒店（地点，地标附近，指定酒店，日期，房间类型）
-3. 购买火车票飞机票（和设定始发地和目的地，以及日期时间段）
-
-- 地图类（高德）
-1. 导航，打车（始发地，目的地可以更改）
-
-- 听歌类（网易云，QQ音乐）
-1. 搜索歌曲，歌手，乐队
-2. 搜索并播放
