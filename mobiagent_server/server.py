@@ -296,11 +296,11 @@ async def root():
 if __name__ == "__main__":
     import uvicorn, argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--service-ip", type=str, default="127.0.0.1")
+    parser.add_argument("--service_ip", type=str, default="127.0.0.1")
     parser.add_argument("--port", type=int, default=22334)
-    parser.add_argument("--planner-port", type=int, default=18003)
-    parser.add_argument("--decider-port", type=int, default=18001)
-    parser.add_argument("--grounder-port", type=int, default=18002)
+    parser.add_argument("--planner_port", type=int, default=18003)
+    parser.add_argument("--decider_port", type=int, default=18001)
+    parser.add_argument("--grounder_port", type=int, default=18002)
     args = parser.parse_args()
     decider_client = OpenAI(api_key="0", base_url=f"http://{args.service_ip}:{args.decider_port}/v1")
     grounder_client = OpenAI(api_key="0", base_url=f"http://{args.service_ip}:{args.grounder_port}/v1")

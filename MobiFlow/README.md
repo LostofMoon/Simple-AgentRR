@@ -1,4 +1,4 @@
-# LLM Agent 任务验证 DAG 框架
+# MobiFlow: 基于dag的移动代理基准测试框架
 
 一个离线验证框架：在收集到某次任务执行的完整轨迹（关键帧/事件）后，读取任务的 DAG 配置，检查是否存在满足依赖与顺序约束的"满足路径"，从而判断该次执行是否达到任务目标。
 
@@ -194,36 +194,6 @@ success:
   any_of: [follow_author]
 ```
 
-### 高级配置：动态筛选条件检查
-
-```yaml
-task_id: taobao_generic_search
-description: 在淘宝App中将<选择条件>的<商品描述>加入购物车
-nodes:
-  - id: apply_filter_condition
-    name: 按照任务要求应用筛选条件
-    condition:
-      type: escalate
-      params:
-        action:
-          type: click
-        dynamic_match:
-          extract_from: task_description
-          condition_patterns:
-            sales_highest:
-              trigger_keywords: ["销量最高", "销量最多", "销量"]
-              verify_keywords: ["销量", "最高", "最多"]
-              llm_prompt: "该步骤是否执行了按销量排序的操作？"
-            price_lowest:
-              trigger_keywords: ["价格最低", "最便宜", "价格从低到高"]
-              verify_keywords: ["价格", "低到高", "便宜", "最低"]
-              llm_prompt: "该步骤是否执行了按价格从低到高排序的操作？"
-          verification_fields: ["reasoning", "text"]
-          fallback_llm: true
-        llm:
-          prompt: "该步是否按照任务要求执行了相应的筛选或排序操作？"
-          expected_true: true
-```
 
 ### 图标检测配置示例
 
@@ -485,4 +455,4 @@ text → regex →  action  → icons → ocr → llm
 
 ---
 
-若你需要适配真实移动端采集（OCR、UI dump、强 LLM 审核回调等），可将其加工为上述 `frames` 数组再进行离线验证；也可通过自定义检查器接入更复杂的判断逻辑。
+若你需要适配真实移动端各类设备采集（OCR、UI dump、强 LLM 审核回调等），可将其加工为上述 `frames` 数组再进行离线验证；也可通过自定义检查器接入更复杂的判断逻辑。
