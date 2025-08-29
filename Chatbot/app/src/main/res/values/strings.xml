@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">A.I. Chatbot</string>
+    <string name="accessibility_service_description">AI Chatbot 无障碍服务用于自动化操作，包括点击、滑动等功能。启用此服务以允许应用执行自动化任务。</string>
+</resources>
