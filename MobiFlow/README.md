@@ -63,6 +63,19 @@
 pip install -r requirements.txt
 ```
 
+可选额外安装一个OCR辅助工具，配合Paddle进行检测：
+
+```bash
+# 安装Tesseract OCR
+sudo apt-get install tesseract-ocr
+
+# 安装中文语言包
+sudo apt-get install tesseract-ocr-chi-sim
+
+# 检查是否正确安装
+tesseract --version
+```
+
 ### 图标检测功能额外依赖
 
 ```bash
