@@ -1,0 +1,46 @@
+{
+  "image": "/Users/zhaoxi/Documents/ipads/LlmAgent/auto_collect/data/xiechen/type3/1/8.jpg",
+  "count": 2,
+  "items": [
+    {
+      "index": 0,
+      "bounds": [
+        7,
+        1949,
+        174,
+        2146
+      ],
+      "bounds_orig": [
+        0,
+        1940,
+        186,
+        2157
+      ],
+      "file": "icon_000_已选日期.jpg",
+      "label": "已选日期",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    },
+    {
+      "index": 1,
+      "bounds": [
+        86,
+        2206,
+        121,
+        2250
+      ],
+      "bounds_orig": [
+        0,
+        2167,
+        185,
+        2358
+      ],
+      "file": "icon_001_预约.jpg",
+      "label": "预约",
+      "aliases": [],
+      "refined": true,
+      "refine_method": "cv2"
+    }
+  ]
+}
