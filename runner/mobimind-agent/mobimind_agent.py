@@ -104,19 +104,19 @@ decider_client = None
 grounder_client = None
 planner_client = None
 
-def init(base_url, decider_port, grounder_port, planner_port):
+def init(service_ip, decider_port, grounder_port, planner_port):
     global decider_client, grounder_client, planner_client, general_client, general_model, apps
     decider_client = OpenAI(
         api_key = "0",
-        base_url = f"{base_url}:{decider_port}/v1",
+        base_url = f"http://{service_ip}:{decider_port}/v1",
     )
     grounder_client = OpenAI(
         api_key = "0",
-        base_url = f"{base_url}:{grounder_port}/v1",
+        base_url = f"{service_ip}:{grounder_port}/v1",
     )
     planner_client = OpenAI(
         api_key = "0",
-        base_url = f"{base_url}:{planner_port}/v1",
+        base_url = f"{service_ip}:{planner_port}/v1",
     )
 
 decider_prompt_template = """
@@ -408,7 +408,7 @@ def get_app_package_name(task_description):
 if __name__ == "__main__":
     # 解析命令行参数
     parser = argparse.ArgumentParser(description="MobiMind Agent")
-    parser.add_argument("--base_url", type=str, default="http://localhost", help="Base URL for the services (default: http://localhost)")
+    parser.add_argument("--service_ip", type=str, default="localhost", help="Ip for the services (default: localhost)")
     parser.add_argument("--decider_port", type=int, default=8000, help="Port for decider service (default: 8000)")
     parser.add_argument("--grounder_port", type=int, default=8001, help="Port for grounder service (default: 8001)")
     parser.add_argument("--planner_port", type=int, default=8002, help="Port for planner service (default: 8002)")
@@ -416,7 +416,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # 使用命令行参数初始化
-    init(args.base_url, args.decider_port, args.grounder_port, args.planner_port)
+    init(args.service_ip, args.decider_port, args.grounder_port, args.planner_port)
 
     device = AndroidDevice()
     print(f"connect to device")
