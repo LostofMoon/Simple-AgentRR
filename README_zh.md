@@ -1,4 +1,4 @@
-# MobiAgent
+# MobiAgent: Towards Universally Customizable Mobile Agents
 
 <div align="center">
 <p align="center">

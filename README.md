@@ -1,4 +1,4 @@
-# MobiAgent
+# MobiAgent: Towards Universally Customizable Mobile Agents
 
 <div align="center">
 <p align="center">
@@ -18,7 +18,7 @@ MobiAgent is a powerful mobile agent system including:
 
 - `[2025.8.30]`🔥 We've open-sourced the MobiAgent!
 
-## Results
+## Evaluation Results
 
 <div align="center">
 <p align="center">
