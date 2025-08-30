@@ -1,10 +1,18 @@
-# MobiAgent: Towards Universally Customizable Mobile Agents
-
 <div align="center">
-<p align="center">
-  <img src="assets/logo.png" width="30%"/>
-</p>
+  <picture>
+    <img alt="MobiAgent" src="assets/logo.png" width=10%>
+  </picture>
 </div>
+
+<h3 align="center">
+MobiAgent: Towards Universally Customizable Mobile Agents
+</h3>
+
+<p align="center">
+| <a href="https://arxiv.org/"><b>论文</b></a> | <a href="https://huggingface.co/collections/IPADS-SAI/mobimind-68b2aad150ccafd9d9e10e4d"><b>Huggingface</b></a> | <a href="https://github.com/IPADS-SAI/MobiAgent/releases/tag/v1.0"><b>App</b></a> |
+</p> 
+
+---
 
 [English](README.md) | **中文**
 
@@ -13,6 +21,14 @@ MobiAgent是一个强大的移动端智能体系统，包含：
 * **智能体模型家族：** MobiMind
 * **智能体加速框架：** AgentRR
 * **智能体评测基准：** MobiFlow
+
+系统架构:
+
+<div align="center">
+<p align="center">
+  <img src="assets/arch.png" width="100%"/>
+</p>
+</div>
 
 ## 新闻
 

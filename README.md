@@ -1,10 +1,18 @@
-# MobiAgent: Towards Universally Customizable Mobile Agents
-
 <div align="center">
-<p align="center">
-  <img src="assets/logo.png" width="30%"/>
-</p>
+  <picture>
+    <img alt="MobiAgent" src="assets/logo.png" width=10%>
+  </picture>
 </div>
+
+<h3 align="center">
+MobiAgent: Towards Universally Customizable Mobile Agents
+</h3>
+
+<p align="center">
+| <a href="https://arxiv.org/"><b>Paper</b></a> | <a href="https://huggingface.co/collections/IPADS-SAI/mobimind-68b2aad150ccafd9d9e10e4d"><b>Huggingface</b></a> | <a href="https://github.com/IPADS-SAI/MobiAgent/releases/tag/v1.0"><b>App</b></a> |
+</p> 
+
+---
 
  **English** | [中文](README_zh.md)
 
@@ -13,6 +21,14 @@ MobiAgent is a powerful mobile agent system including:
 * **An agent model family**: MobiMind
 * **An agent acceleration framework**: AgentRR
 * **An agent benchmark**: MobiFlow
+
+System Architecture:
+
+<div align="center">
+<p align="center">
+  <img src="assets/arch.png" width="100%"/>
+</p>
+</div>
 
 ## News
 
@@ -30,8 +46,14 @@ MobiAgent is a powerful mobile agent system including:
 
 <div align="center">
 <p align="center">
-  <img src="assets/result_agentrr.png" width="75%" style="margin-right: 15px;"/>
+  <img src="assets/result_agentrr.png" width="60%"/>
 </p>
+</div>
+
+## Demo
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/8f5998c2-6728-454b-b48e-87683e53bf6a"/>
 </div>
 
 ## Project Structure
